@@ -769,3 +769,22 @@ INSERT INTO APOLLO_PORTAL.USERS (USERNAME, PASSWORD, USERDISPLAYNAME, EMAIL, ENA
 INSERT INTO APOLLO_PORTAL.AUTHORITIES (USERNAME, AUTHORITY) VALUES ('apollo', 'ROLE_user');
 COMMIT;
 
+
+
+------------------------------------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------------------------------------
+-- 创建自定义函数
+CREATE OR REPLACE FUNCTION APOLLO_PORTAL.UNIX_TIMESTAMP_MILLIS(p_timestamp IN TIMESTAMP) RETURN NUMBER IS
+    v_millis NUMBER := 0;
+BEGIN
+    v_millis :=
+        (EXTRACT(YEAR FROM p_timestamp) - 1970) * 31536000000 + -- 31536000000 毫秒/年
+        (EXTRACT(MONTH FROM p_timestamp) - 1) * 2592000000 +    -- 2592000000 毫秒/月（平均）
+        (EXTRACT(DAY FROM p_timestamp) - 1) * 86400000 +        -- 86400000 毫秒/天
+        EXTRACT(HOUR FROM p_timestamp) * 3600000 +              -- 3600000 毫秒/小时
+        EXTRACT(MINUTE FROM p_timestamp) * 60000 +              -- 60000 毫秒/分钟
+        ROUND(EXTRACT(SECOND FROM p_timestamp) * 1000);         -- 毫秒
+RETURN v_millis;
+END;
+/
