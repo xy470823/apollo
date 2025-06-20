@@ -30,7 +30,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "\"CLUSTER\"")
-@SQLDelete(sql = "Update `Cluster` set IsDeleted = true, DeletedAt = ROUND(UNIX_TIMESTAMP(NOW(4))*1000) where Id = ?")
+@SQLDelete(sql = "Update Cluster set IsDeleted = 1, DeletedAt = UNIX_TIMESTAMP_MILLIS(SYSTIMESTAMP) where Id = ?")
 @Where(clause = "IsDeleted = false")
 public class Cluster extends BaseEntity implements Comparable<Cluster> {
 
