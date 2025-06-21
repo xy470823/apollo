@@ -41,7 +41,7 @@ public class ConfigChangeContentBuilder {
   }
 
   public ConfigChangeContentBuilder updateItem(Item oldItem, Item newItem) {
-    if (!oldItem.getValue().equals(newItem.getValue())) {
+    if (!org.apache.commons.lang3.StringUtils.equals(oldItem.getKey(), newItem.getKey())) {
       ItemPair itemPair = new ItemPair(cloneItem(oldItem), cloneItem(newItem));
       updateItems.add(itemPair);
     }

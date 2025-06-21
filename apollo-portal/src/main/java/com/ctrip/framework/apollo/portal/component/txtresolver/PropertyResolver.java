@@ -27,13 +27,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import javax.validation.constraints.NotNull;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -49,20 +43,17 @@ public class PropertyResolver implements ConfigTextResolver {
 
   @Override
   public ItemChangeSets resolve(long namespaceId, String configText, List<ItemDTO> baseItems) {
-
     Map<String, ItemDTO> oldKeyMapItem = BeanUtils.mapByKey("key", baseItems);
     //remove comment and blank item map.
     oldKeyMapItem.remove("");
-
+    oldKeyMapItem.remove(null);
     // comment items
     List<ItemDTO> baseCommentItems = new LinkedList<>();
     // blank items
     List<ItemDTO> baseBlankItems = new LinkedList<>();
     if (!CollectionUtils.isEmpty(baseItems)) {
-
-      baseCommentItems = baseItems.stream().filter(itemDTO -> isCommentItem(itemDTO)).sorted(Comparator.comparing(ItemDTO::getLineNum)).collect(Collectors.toCollection(LinkedList::new));
-
-      baseBlankItems = baseItems.stream().filter(itemDTO -> isBlankItem(itemDTO)).sorted(Comparator.comparing(ItemDTO::getLineNum)).collect(Collectors.toCollection(LinkedList::new));
+      baseCommentItems = baseItems.stream().filter(this::isCommentItem).sorted(Comparator.comparing(ItemDTO::getLineNum)).collect(Collectors.toCollection(LinkedList::new));
+      baseBlankItems = baseItems.stream().filter(this::isBlankItem).sorted(Comparator.comparing(ItemDTO::getLineNum)).collect(Collectors.toCollection(LinkedList::new));
     }
 
     String[] newItems = configText.split(ITEM_SEPARATOR);
@@ -70,33 +61,33 @@ public class PropertyResolver implements ConfigTextResolver {
     if (isHasRepeatKey(newItems, repeatKeys)) {
       throw new BadRequestException("Config text has repeated keys: %s, please check your input.", repeatKeys);
     }
-
     ItemChangeSets changeSets = new ItemChangeSets();
     Map<Integer, String> newLineNumMapItem = new HashMap<>();//use for delete blank and comment item
+    Map<String, Integer> countItem = new HashMap<>();
     int lineCounter = 1;
     for (String newItem : newItems) {
       newItem = newItem.trim();
-      newLineNumMapItem.put(lineCounter, newItem);
+      //校验数据是否重复
+      if (countItem.containsKey(newItem)) {
+        throw new RuntimeException("第" + lineCounter + "行与第" + countItem.get(newItem) + "行数据重复");
+      }
+      countItem.put(newItem, lineCounter);
 
+      newLineNumMapItem.put(lineCounter, newItem);
       //comment item
       if (isCommentItem(newItem)) {
         ItemDTO oldItemDTO = null;
         if (!CollectionUtils.isEmpty(baseCommentItems)) {
           oldItemDTO = baseCommentItems.remove(0);
         }
-
         handleCommentLine(namespaceId, oldItemDTO, newItem, lineCounter, changeSets);
-
         //blank item
       } else if (isBlankItem(newItem)) {
-
         ItemDTO oldItemDTO = null;
         if (!CollectionUtils.isEmpty(baseBlankItems)) {
           oldItemDTO = baseBlankItems.remove(0);
         }
-
         handleBlankLine(namespaceId, oldItemDTO, lineCounter, changeSets);
-
         //normal item
       } else {
         handleNormalLine(namespaceId, oldKeyMapItem, newItem, lineCounter, changeSets);
@@ -144,9 +135,9 @@ public class PropertyResolver implements ConfigTextResolver {
   }
 
   private void handleCommentLine(Long namespaceId, ItemDTO oldItemByLine, String newItem, int lineCounter, ItemChangeSets changeSets) {
-    if (null == oldItemByLine) {
+    if (null == oldItemByLine || lineCounter != oldItemByLine.getLineNum()) {
       changeSets.addCreateItem(buildCommentItem(0L, namespaceId, newItem, lineCounter));
-    } else if (!StringUtils.equals(oldItemByLine.getComment(), newItem) || lineCounter != oldItemByLine.getLineNum()) {
+    } else if (!StringUtils.equals(oldItemByLine.getComment(), newItem)) {
       changeSets.addUpdateItem(buildCommentItem(oldItemByLine.getId(), namespaceId, newItem, lineCounter));
     }
   }
@@ -167,12 +158,10 @@ public class PropertyResolver implements ConfigTextResolver {
     if (kv == null) {
       throw new BadRequestException("line:" + lineCounter + " key value must separate by '='");
     }
-
     String newKey = kv[0];
     String newValue = kv[1].replace("\\n", "\n"); //handle user input \n
 
     ItemDTO oldItem = keyMapOldItem.get(newKey);
-
     //new item
     if (oldItem == null) {
       changeSets.addCreateItem(buildNormalItem(0L, namespaceId, newKey, newValue, "", lineCounter));
@@ -184,8 +173,10 @@ public class PropertyResolver implements ConfigTextResolver {
   }
 
   private boolean isCommentItem(ItemDTO item) {
-    return item != null && "".equals(item.getKey())
-        && (item.getComment().startsWith("#") || item.getComment().startsWith("!"));
+    //return item != null && "".equals(item.getKey()) && (item.getComment().startsWith("#") || item.getComment().startsWith("!"));
+    return item != null && org.apache.commons.lang3.StringUtils.isAllBlank(item.getKey(), item.getValue())
+            && org.apache.commons.lang3.StringUtils.isNotBlank(item.getComment())
+            && (item.getComment().startsWith("#") || item.getComment().startsWith("!"));
   }
 
   private boolean isCommentItem(String line) {

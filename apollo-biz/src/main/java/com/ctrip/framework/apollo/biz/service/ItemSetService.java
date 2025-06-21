@@ -27,15 +27,12 @@ import com.ctrip.framework.apollo.common.exception.BadRequestException;
 import com.ctrip.framework.apollo.common.exception.NotFoundException;
 import com.ctrip.framework.apollo.common.utils.BeanUtils;
 import com.ctrip.framework.apollo.core.utils.StringUtils;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -66,10 +63,12 @@ public class ItemSetService {
   }
 
   @Transactional
-  public ItemChangeSets updateSet(String appId, String clusterName,
-                                  String namespaceName, ItemChangeSets changeSet) {
+  public ItemChangeSets updateSet(String appId, String clusterName, String namespaceName, ItemChangeSets changeSet) {
+    String operator = changeSet.getDataChangeLastModifiedBy();
     if (changeSet.isEmpty()) {
-      throw new BadRequestException("无变更内容");
+      //删除历史注释重复的数据
+      deleteComments(appId, clusterName, namespaceName,operator);
+      return changeSet;
     }
     List<ItemDTO> nullList = changeSet.getCreateItems().stream()
             .filter(item -> StringUtils.isBlank(item.getKey())
@@ -79,12 +78,6 @@ public class ItemSetService {
     if (!nullList.isEmpty()) {
       throw new BadRequestException("第" + nullList.get(0).getLineNum() + "行 无数据;请确认");
     }
-    //
-    //changeSet.getDeleteItems().addAll(filterNonFirstOccurrences(changeSet.getCreateItems()));
-    //changeSet.getDeleteItems().addAll(filterNonFirstOccurrences(changeSet.getUpdateItems()));
-    //排除重复的数据
-    changeSet.setCreateItems(toDeleteItems(changeSet.getCreateItems()));
-    changeSet.setUpdateItems(toDeleteItems(changeSet.getUpdateItems()));
     Namespace namespace = namespaceService.findOne(appId, clusterName, namespaceName);
     if (namespace == null) {
       throw NotFoundException.namespaceNotFound(appId, clusterName, namespaceName);
@@ -100,24 +93,25 @@ public class ItemSetService {
       }
     }
 
-    String operator = changeSet.getDataChangeLastModifiedBy();
     ConfigChangeContentBuilder configChangeContentBuilder = new ConfigChangeContentBuilder();
-
     if (!CollectionUtils.isEmpty(changeSet.getCreateItems())) {
+      //注释去重之后的数据
+      List<ItemDTO> createItemList =distinctComments(changeSet.getCreateItems());
+      //添加去重后的数据
+      changeSet.setCreateItems(createItemList);
       this.doCreateItems(changeSet.getCreateItems(), namespace, operator, configChangeContentBuilder);
       auditService.audit("ItemSet", null, Audit.OP.INSERT, operator);
     }
-
     if (!CollectionUtils.isEmpty(changeSet.getUpdateItems())) {
       this.doUpdateItems(changeSet.getUpdateItems(), namespace, operator, configChangeContentBuilder);
       auditService.audit("ItemSet", null, Audit.OP.UPDATE, operator);
     }
-
     if (!CollectionUtils.isEmpty(changeSet.getDeleteItems())) {
       this.doDeleteItems(changeSet.getDeleteItems(), namespace, operator, configChangeContentBuilder);
       auditService.audit("ItemSet", null, Audit.OP.DELETE, operator);
     }
-
+    //删除历史注释重复的数据
+    deleteComments(appId, clusterName, namespaceName,operator);
     if (configChangeContentBuilder.hasContent()) {
       commitService.createCommit(appId, clusterName, namespaceName, configChangeContentBuilder.build(),
                                  changeSet.getDataChangeLastModifiedBy());
@@ -126,38 +120,77 @@ public class ItemSetService {
     return changeSet;
   }
 
-  public static List<ItemDTO> filterNonFirstOccurrences(List<ItemDTO> lines) {
-    // 用于跟踪已出现的字符串
-    Set<String> seen = new HashSet<>();
-    return lines.stream()
-            .filter(line -> {
-              // 检查是否已经出现过
-              if (seen.contains(line.getComment())) {
-                return true; // 非首次出现，保留
-              } else {
-                seen.add(line.getComment()); // 首次出现，标记为已见
-                return false; // 不保留首次出现的字符串
-              }
-            })
-            .collect(Collectors.toList());
+  public static List<ItemDTO>  distinctComments(List<ItemDTO> itemDTOList) {
+    if (CollectionUtils.isEmpty(itemDTOList)) {
+      return itemDTOList;
+    }
+    // 使用 LinkedHashMap 保留顺序并去重
+    Map<String, ItemDTO> distinctComments = new LinkedHashMap<>();
+    List<ItemDTO> filteredList = new ArrayList<>();
+    for (ItemDTO item : itemDTOList) {
+      if (org.apache.commons.lang3.StringUtils.isAllBlank(item.getKey(), item.getValue())) {
+        String comment = item.getComment();
+        // 只保留首次出现的 comment，不为 null 才去重
+        if (!distinctComments.containsKey(comment)) {
+          distinctComments.put(comment, item);
+          continue;
+        }
+        throw new RuntimeException("第" + item.getLineNum() + "与第" + distinctComments.get(comment).getLineNum() + "行数据重复");
+      }
+      filteredList.add(item); // 非空项直接保留
+    }
+    // 添加去重后的空白项
+    filteredList.addAll(distinctComments.values());
+    return filteredList;
   }
 
-  private List<ItemDTO> toDeleteItems(List<ItemDTO> itemDTOS) {
-    // 用于跟踪已处理的空key/value的comment
-    Set<String> processedComments = new HashSet<>();
-    return itemDTOS.stream()
-            .filter(item -> {
-              // 1. 如果key或value不为空，直接保留
-              if (!StringUtils.isBlank(item.getKey()) || !StringUtils.isBlank(item.getValue())) {
-                return true;
-              }
-              // 2. 处理key/value都为空的情况
-              String comment = item.getComment() != null ? item.getComment() : "NULL_COMMENT";
-              // 3. 如果是首次出现的comment则保留，并标记为已处理
-              return processedComments.add(comment);
-              // 4. 重复的comment排除
-            })
+  private void deleteComments(String appId, String clusterName, String namespaceName,String operator){
+    //获取所有数据
+    List<Item> allList = itemService.findItemsWithOrdered(appId, clusterName, namespaceName);
+    //筛选出所有的注释数据
+    List<Item> allCommentsList = allList.stream()
+            .filter(item -> org.apache.commons.lang3.StringUtils.isAllBlank(item.getKey(), item.getValue()))
             .collect(Collectors.toList());
+    List<Item> deleteList = new ArrayList<>(allCommentsList.stream()
+            // 过滤掉 COMMENT 为 null 的项
+            .filter(item -> item.getComment() != null)
+            // 按 COMMENT 分组并取最新时间
+            .collect(Collectors.toMap(
+                    Item::getComment,
+                    item -> item,
+                    // 当两个相同 COMMENT 出现时，保留时间更大的
+                    (existing, replacement) ->
+                            existing.getDataChangeLastModifiedTime().compareTo(replacement.getDataChangeLastModifiedTime()) > 0
+                                    ? existing : replacement
+            ))
+            .values());
+    //对数据库重复的注释数据进行删除
+    allCommentsList.removeAll(deleteList);
+    allCommentsList.forEach(item -> itemService.delete(item.getId(),operator));
+  }
+
+  private void deleteComments(String appId, String clusterName, String namespaceName,List<ItemDTO> createItemList,String operator){
+    //获取所有数据
+    List<Item> allList = itemService.findItemsWithOrdered(appId, clusterName, namespaceName);
+    //筛选出所有的注释数据
+    List<Item> allCommentsList = allList.stream()
+            .filter(item -> org.apache.commons.lang3.StringUtils.isAllBlank(item.getKey(), item.getValue()))
+            .collect(Collectors.toList());
+    //筛选出本次需要新建的注释数据
+    List<ItemDTO> newCommentsList = createItemList.stream()
+            .filter(item -> org.apache.commons.lang3.StringUtils.isAllBlank(item.getKey(), item.getValue()))
+            .collect(Collectors.toList());
+    Set<String> newCommentKeys = newCommentsList.stream()
+            .map(ItemDTO::getComment)
+            .filter(org.apache.commons.lang3.StringUtils::isNotBlank)
+            .collect(Collectors.toSet());
+    //筛选出数据库注释与本次新增注释重复的数据
+    List<Item> deleteList = allCommentsList.stream()
+            .filter(item -> newCommentKeys.contains(item.getComment()))
+            .collect(Collectors.toList());
+    //对数据库重复的注释数据进行删除
+    deleteList.forEach(item -> itemService.delete(item.getId(),operator));
+
   }
 
 

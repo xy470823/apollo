@@ -226,10 +226,8 @@ public class AdminServiceAPI {
       return restTemplate.get(env, "items/{itemId}", ItemDTO.class, itemId);
     }
 
-    public void updateItemsByChangeSet(String appId, Env env, String clusterName, String namespace,
-        ItemChangeSets changeSets) {
-      restTemplate.post(env, "apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/itemset",
-          changeSets, Void.class, appId, clusterName, namespace);
+    public void updateItemsByChangeSet(String appId, Env env, String clusterName, String namespace, ItemChangeSets changeSets) {
+      restTemplate.post(env, "apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/itemset", changeSets, Void.class, appId, clusterName, namespace);
     }
 
     public void updateItem(String appId, Env env, String clusterName, String namespace, long itemId, ItemDTO item) {

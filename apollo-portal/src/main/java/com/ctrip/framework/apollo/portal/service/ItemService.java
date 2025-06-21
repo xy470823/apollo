@@ -39,7 +39,8 @@ import com.ctrip.framework.apollo.portal.entity.vo.NamespaceIdentifier;
 import com.ctrip.framework.apollo.portal.spi.UserInfoHolder;
 import com.ctrip.framework.apollo.tracer.Tracer;
 import com.google.gson.Gson;
-import java.util.HashMap;
+
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -47,9 +48,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.HttpClientErrorException;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -95,23 +93,16 @@ public class ItemService {
       throw BadRequestException.namespaceNotExists(appId, clusterName, namespaceName);
     }
     long namespaceId = namespace.getId();
-
     // In case someone constructs an attack scenario
     if (model.getNamespaceId() != namespaceId) {
       throw BadRequestException.namespaceNotExists();
     }
-
     String configText = model.getConfigText();
-
-    ConfigTextResolver resolver =
-        model.getFormat() == ConfigFileFormat.Properties ? propertyResolver : fileTextResolver;
-
-    ItemChangeSets changeSets = resolver.resolve(namespaceId, configText,
-        itemAPI.findItems(appId, env, clusterName, namespaceName));
-    if (changeSets.isEmpty()) {
-      return;
-    }
-
+    ConfigTextResolver resolver = model.getFormat() == ConfigFileFormat.Properties ? propertyResolver : fileTextResolver;
+    ItemChangeSets changeSets = resolver.resolve(namespaceId, configText,itemAPI.findItems(appId, env, clusterName, namespaceName));
+    /*if (changeSets.isEmpty()) {
+      //return;
+    }*/
     String operator = model.getOperator();
     if (StringUtils.isBlank(operator)) {
       operator = userInfoHolder.getUser().getUserId();
@@ -120,15 +111,12 @@ public class ItemService {
 
     updateItems(appId, env, clusterName, namespaceName, changeSets);
 
-    Tracer.logEvent(TracerEventType.MODIFY_NAMESPACE_BY_TEXT,
-        String.format("%s+%s+%s+%s", appId, env, clusterName, namespaceName));
+    Tracer.logEvent(TracerEventType.MODIFY_NAMESPACE_BY_TEXT, String.format("%s+%s+%s+%s", appId, env, clusterName, namespaceName));
     Tracer.logEvent(TracerEventType.MODIFY_NAMESPACE, String.format("%s+%s+%s+%s", appId, env, clusterName, namespaceName));
   }
-
   public void updateItems(String appId, Env env, String clusterName, String namespaceName, ItemChangeSets changeSets){
     itemAPI.updateItemsByChangeSet(appId, env, clusterName, namespaceName, changeSets);
   }
-
 
   public ItemDTO createItem(String appId, Env env, String clusterName, String namespaceName, ItemDTO item) {
     NamespaceDTO namespace = namespaceAPI.loadNamespace(appId, env, clusterName, namespaceName);
