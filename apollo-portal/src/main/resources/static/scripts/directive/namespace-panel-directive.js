@@ -886,11 +886,12 @@ function directive($window, $translate, toastr, AppUtil, EventManager, Permissio
                         return;
                     }
                     if (item.item.key) {
-                        //use string \n to display as new line
-                        var itemValue = item.item.value.replace(/\n/g, "\\n");
-
-                        result +=
-                            item.item.key + " = " + itemValue + "\n";
+                        let itemValue = "";
+                        if (item.item.value !== undefined && item.item.value !== null){
+                            //use string \n to display as new line
+                            itemValue = item.item.value.replace(/\n/g, "\\n");
+                        }
+                        result += item.item.key + " = " + itemValue + "\n";
                     } else {
                         result += item.item.comment + "\n";
                     }

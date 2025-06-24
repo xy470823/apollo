@@ -110,9 +110,11 @@ diff_item_module.controller("DiffItemController",
                             propTextArr.sort((item1, item2) => item1.key.localeCompare(item2.key));
                             propTextArr.forEach(function (item) {
                                 if (item.key) {
-                                    //use string \n to display as new line
-                                    var itemValue = item.value.replace(/\n/g, "\\n");
-
+                                    let itemValue = "";
+                                    if (item.value !== undefined && item.value !== null){
+                                        //use string \n to display as new line
+                                        itemValue = item.value.replace(/\n/g, "\\n");
+                                    }
                                     propTextInfo += item.key + " = " + itemValue + "\n";
                                 } else {
                                     propTextInfo += item.comment + "\n";
