@@ -111,7 +111,7 @@ public class ItemSetService {
       auditService.audit("ItemSet", null, Audit.OP.DELETE, operator);
     }
     //删除历史注释重复的数据
-    deleteComments(appId, clusterName, namespaceName,operator);
+    deleteComments(namespace.getId(), operator);
     if (configChangeContentBuilder.hasContent()) {
       commitService.createCommit(appId, clusterName, namespaceName, configChangeContentBuilder.build(),
                                  changeSet.getDataChangeLastModifiedBy());
@@ -128,28 +128,54 @@ public class ItemSetService {
     Map<String, ItemDTO> distinctComments = new LinkedHashMap<>();
     List<ItemDTO> filteredList = new ArrayList<>();
     for (ItemDTO item : itemDTOList) {
-      if (org.apache.commons.lang3.StringUtils.isAllBlank(item.getKey(), item.getValue())) {
+      // 只有真正的注释项（key/value 为空且 comment 非空）才需要去重，
+      // 空行项（key/value/comment 全为空）允许重复出现
+      if (isCommentItem(item)) {
         String comment = item.getComment();
-        // 只保留首次出现的 comment，不为 null 才去重
-        if (!distinctComments.containsKey(comment)) {
-          distinctComments.put(comment, item);
-          continue;
+        // 只保留首次出现的 comment
+        ItemDTO firstOccurrence = distinctComments.get(comment);
+        if (firstOccurrence != null) {
+          throw new BadRequestException("第" + item.getLineNum() + "行与第" + firstOccurrence.getLineNum() + "行数据重复");
         }
-        throw new RuntimeException("第" + item.getLineNum() + "与第" + distinctComments.get(comment).getLineNum() + "行数据重复");
+        distinctComments.put(comment, item);
       }
-      filteredList.add(item); // 非空项直接保留
+      filteredList.add(item); // 保留原有顺序
     }
-    // 添加去重后的空白项
-    filteredList.addAll(distinctComments.values());
     return filteredList;
   }
 
+  /**
+   * 是否为注释项：key/value 均为空且 comment 非空。
+   * 空行项（comment 也为空）不属于注释项，不应被去重/删除。
+   */
+  private static boolean isCommentItem(ItemDTO item) {
+    return item != null
+        && org.apache.commons.lang3.StringUtils.isAllBlank(item.getKey(), item.getValue())
+        && org.apache.commons.lang3.StringUtils.isNotBlank(item.getComment());
+  }
+
+  /**
+   * 是否为注释项：key/value 均为空且 comment 非空。
+   */
+  private static boolean isCommentItem(Item item) {
+    return item != null
+        && org.apache.commons.lang3.StringUtils.isAllBlank(item.getKey(), item.getValue())
+        && org.apache.commons.lang3.StringUtils.isNotBlank(item.getComment());
+  }
+
   private void deleteComments(String appId, String clusterName, String namespaceName,String operator){
-    //获取所有数据
-    List<Item> allList = itemService.findItemsWithOrdered(appId, clusterName, namespaceName);
-    //筛选出所有的注释数据
-    List<Item> allCommentsList = allList.stream()
-            .filter(item -> org.apache.commons.lang3.StringUtils.isAllBlank(item.getKey(), item.getValue()))
+    Namespace namespace = namespaceService.findOne(appId, clusterName, namespaceName);
+    if (namespace == null) {
+      return;
+    }
+    deleteComments(namespace.getId(), operator);
+  }
+
+  private void deleteComments(long namespaceId, String operator){
+    //只查询 key 为空的注释/空行数据，避免每次保存都扫描整个 namespace 的所有配置项
+    List<Item> allCommentsList = itemService.findEmptyKeyItemsWithOrdered(namespaceId).stream()
+            //筛选出所有的注释数据（空行项不属于注释，不能被删除）
+            .filter(ItemSetService::isCommentItem)
             .collect(Collectors.toList());
     List<Item> deleteList = new ArrayList<>(allCommentsList.stream()
             // 过滤掉 COMMENT 为 null 的项
@@ -169,29 +195,6 @@ public class ItemSetService {
     allCommentsList.forEach(item -> itemService.delete(item.getId(),operator));
   }
 
-  private void deleteComments(String appId, String clusterName, String namespaceName,List<ItemDTO> createItemList,String operator){
-    //获取所有数据
-    List<Item> allList = itemService.findItemsWithOrdered(appId, clusterName, namespaceName);
-    //筛选出所有的注释数据
-    List<Item> allCommentsList = allList.stream()
-            .filter(item -> org.apache.commons.lang3.StringUtils.isAllBlank(item.getKey(), item.getValue()))
-            .collect(Collectors.toList());
-    //筛选出本次需要新建的注释数据
-    List<ItemDTO> newCommentsList = createItemList.stream()
-            .filter(item -> org.apache.commons.lang3.StringUtils.isAllBlank(item.getKey(), item.getValue()))
-            .collect(Collectors.toList());
-    Set<String> newCommentKeys = newCommentsList.stream()
-            .map(ItemDTO::getComment)
-            .filter(org.apache.commons.lang3.StringUtils::isNotBlank)
-            .collect(Collectors.toSet());
-    //筛选出数据库注释与本次新增注释重复的数据
-    List<Item> deleteList = allCommentsList.stream()
-            .filter(item -> newCommentKeys.contains(item.getComment()))
-            .collect(Collectors.toList());
-    //对数据库重复的注释数据进行删除
-    deleteList.forEach(item -> itemService.delete(item.getId(),operator));
-
-  }
 
 
   private void doDeleteItems(List<ItemDTO> toDeleteItems, Namespace namespace, String operator,

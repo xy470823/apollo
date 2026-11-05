@@ -32,7 +32,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "UserRole")
-@SQLDelete(sql = "Update UserRole set IsDeleted = 1, DeletedAt = UNIX_TIMESTAMP_MILLIS(SYSTIMESTAMP) where Id = ?")
+@SQLDelete(sql = "Update UserRole set IsDeleted = 1, DeletedAt = UNIX_TIMESTAMP_MILLIS(CURRENT_TIMESTAMP) where ID = ?")
 @Where(clause = "IsDeleted = false")
 @ApolloAuditLogDataInfluenceTable(tableName = "UserRole")
 public class UserRole extends BaseEntity {

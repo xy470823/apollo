@@ -24,4 +24,12 @@ public class H2Function {
   public static long unixTimestamp(java.sql.Timestamp timestamp) {
     return timestamp.getTime() / 1000L;
   }
+
+  /**
+   * H2 equivalent of the oracle UNIX_TIMESTAMP_MILLIS function, which converts a timestamp
+   * into the number of milliseconds since 1970-01-01 00:00:00 UTC.
+   */
+  public static long unixTimestampMillis(java.sql.Timestamp timestamp) {
+    return timestamp.getTime();
+  }
 }

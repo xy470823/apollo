@@ -33,7 +33,7 @@ public interface NamespaceRepository extends PagingAndSortingRepository<Namespac
   Namespace findByAppIdAndClusterNameAndNamespaceName(String appId, String clusterName, String namespaceName);
 
   @Modifying
-  @Query("update Namespace set IsDeleted = 1, DeletedAt = UNIX_TIMESTAMP_MILLIS(SYSTIMESTAMP), DataChange_LastModifiedBy = ?3 where AppId=?1 and ClusterName=?2 and IsDeleted = false")
+  @Query("update Namespace set IsDeleted = 1, DeletedAt = UNIX_TIMESTAMP_MILLIS(CURRENT_TIMESTAMP), DataChange_LastModifiedBy = ?3 where AppId=?1 and ClusterName=?2 and IsDeleted = false")
   int batchDelete(String appId, String clusterName, String operator);
 
   List<Namespace> findByAppIdAndNamespaceNameOrderByIdAsc(String appId, String namespaceName);

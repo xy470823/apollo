@@ -63,15 +63,17 @@ public class PropertyResolver implements ConfigTextResolver {
     }
     ItemChangeSets changeSets = new ItemChangeSets();
     Map<Integer, String> newLineNumMapItem = new HashMap<>();//use for delete blank and comment item
-    Map<String, Integer> countItem = new HashMap<>();
+    Map<String, Integer> countItem = new HashMap<>();//only track comment lines, blank lines are allowed to repeat
     int lineCounter = 1;
     for (String newItem : newItems) {
       newItem = newItem.trim();
-      //校验数据是否重复
-      if (countItem.containsKey(newItem)) {
-        throw new RuntimeException("第" + lineCounter + "行与第" + countItem.get(newItem) + "行数据重复");
+      //只对注释行做重复校验，空行和普通配置项允许重复
+      if (isCommentItem(newItem)) {
+        if (countItem.containsKey(newItem)) {
+          throw new BadRequestException("第" + lineCounter + "行与第" + countItem.get(newItem) + "行数据重复");
+        }
+        countItem.put(newItem, lineCounter);
       }
-      countItem.put(newItem, lineCounter);
 
       newLineNumMapItem.put(lineCounter, newItem);
       //comment item
@@ -135,9 +137,10 @@ public class PropertyResolver implements ConfigTextResolver {
   }
 
   private void handleCommentLine(Long namespaceId, ItemDTO oldItemByLine, String newItem, int lineCounter, ItemChangeSets changeSets) {
-    if (null == oldItemByLine || lineCounter != oldItemByLine.getLineNum()) {
+    if (null == oldItemByLine) {
       changeSets.addCreateItem(buildCommentItem(0L, namespaceId, newItem, lineCounter));
-    } else if (!StringUtils.equals(oldItemByLine.getComment(), newItem)) {
+    } else if (!StringUtils.equals(oldItemByLine.getComment(), newItem) || lineCounter != oldItemByLine.getLineNum()) {
+      // always update the same row in place, so that no orphan comment row is left behind
       changeSets.addUpdateItem(buildCommentItem(oldItemByLine.getId(), namespaceId, newItem, lineCounter));
     }
   }

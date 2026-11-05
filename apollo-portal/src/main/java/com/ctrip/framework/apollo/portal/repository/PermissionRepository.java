@@ -52,7 +52,7 @@ public interface PermissionRepository extends PagingAndSortingRepository<Permiss
   List<Long> findPermissionIdsByAppIdAndNamespace(String appId, String namespaceName);
 
   @Modifying
-  @Query("UPDATE Permission SET IsDeleted = 1, DeletedAt = UNIX_TIMESTAMP_MILLIS(SYSTIMESTAMP), DataChange_LastModifiedBy = ?2 WHERE Id in ?1 and IsDeleted = false")
+  @Query("UPDATE Permission SET IsDeleted = 1, DeletedAt = UNIX_TIMESTAMP_MILLIS(CURRENT_TIMESTAMP), DataChange_LastModifiedBy = ?2 WHERE Id in ?1 and IsDeleted = false")
   Integer batchDelete(List<Long> permissionIds, String operator);
 
   @Query("SELECT p.id from Permission p where p.targetId = CONCAT(?1, '+', ?2, '+', ?3)"

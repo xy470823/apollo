@@ -131,6 +131,18 @@ public class ItemService {
     return Collections.emptyList();
   }
 
+  /**
+   * 查询 key 为空的配置项（注释项和空行项），按行号升序。
+   * 用于注释去重场景，避免每次保存都读取整个 namespace 的所有配置项。
+   */
+  public List<Item> findEmptyKeyItemsWithOrdered(long namespaceId) {
+    List<Item> items = itemRepository.findByNamespaceIdAndKeyOrderByLineNumAsc(namespaceId, "");
+    if (items == null) {
+      return Collections.emptyList();
+    }
+    return items;
+  }
+
 
 
   public List<Item> findItemsModifiedAfterDate(long namespaceId, Date date) {

@@ -33,6 +33,8 @@ public interface ItemRepository extends PagingAndSortingRepository<Item, Long> {
 
   Item findByNamespaceIdAndKey(Long namespaceId, String key);
 
+  List<Item> findByNamespaceIdAndKeyOrderByLineNumAsc(Long namespaceId, String key);
+
   List<Item> findByNamespaceIdOrderByLineNumAsc(Long namespaceId);
 
   List<Item> findByNamespaceId(Long namespaceId);
@@ -61,7 +63,7 @@ public interface ItemRepository extends PagingAndSortingRepository<Item, Long> {
   Page<ItemInfoDTO> findItemsByValueLike(@Param("value") String value, Pageable pageable);
 
   @Modifying
-  @Query("update Item set IsDeleted = 1, DeletedAt = UNIX_TIMESTAMP_MILLIS(SYSTIMESTAMP), DataChange_LastModifiedBy = ?2 where NamespaceId = ?1 and IsDeleted = false")
+  @Query("update Item set IsDeleted = 1, DeletedAt = UNIX_TIMESTAMP_MILLIS(CURRENT_TIMESTAMP), DataChange_LastModifiedBy = ?2 where NamespaceId = ?1 and IsDeleted = false")
   int deleteByNamespaceId(long namespaceId, String operator);
 
   @Query("select count(*) from Item where namespaceId = :namespaceId and key <>''")

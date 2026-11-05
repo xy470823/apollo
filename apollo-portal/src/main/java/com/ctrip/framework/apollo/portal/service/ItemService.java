@@ -100,9 +100,8 @@ public class ItemService {
     String configText = model.getConfigText();
     ConfigTextResolver resolver = model.getFormat() == ConfigFileFormat.Properties ? propertyResolver : fileTextResolver;
     ItemChangeSets changeSets = resolver.resolve(namespaceId, configText,itemAPI.findItems(appId, env, clusterName, namespaceName));
-    /*if (changeSets.isEmpty()) {
-      //return;
-    }*/
+    // 即使没有任何变更也不直接返回，
+    // 目的是让后续的注释去重逻辑执行，清理历史上重复的注释数据
     String operator = model.getOperator();
     if (StringUtils.isBlank(operator)) {
       operator = userInfoHolder.getUser().getUserId();

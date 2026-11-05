@@ -940,17 +940,60 @@ COMMIT;
 ------------------------------------------------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------------------------------------------------
--- 创建自定义函数
-CREATE OR REPLACE FUNCTION APOLLO_CONFIG.UNIX_TIMESTAMP_MILLIS(p_timestamp IN TIMESTAMP) RETURN NUMBER IS
-    v_millis NUMBER := 0;
+
+-- 创建权限表
+CREATE TABLE APOLLO_CONFIG.PRIVILEGE (
+    ID NUMBER(10) GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1),
+    "NAME" VARCHAR2(64) DEFAULT '' NOT NULL,
+    PRIVILTYPE VARCHAR2(64) DEFAULT '' NOT NULL,
+    NAMESPACEID NUMBER(10) DEFAULT 0 NOT NULL,
+    ISDELETED NUMBER(1) DEFAULT 0 NOT NULL CHECK (ISDELETED IN (0,1)),
+    DELETEDAT NUMBER(20) DEFAULT 0 NOT NULL,
+    DATACHANGE_CREATEDBY VARCHAR2(64) DEFAULT 'default' NOT NULL,
+    DATACHANGE_CREATEDTIME TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    DATACHANGE_LASTMODIFIEDBY VARCHAR2(64) DEFAULT '',
+    DATACHANGE_LASTTIME TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+tablespace APOLLO_CONFIG_TABLESPACE
+  pctfree 10
+  initrans 1
+  maxtrans 255;
+-- 添加主键
+ALTER TABLE APOLLO_CONFIG.PRIVILEGE ADD CONSTRAINT PK_PRIVILEGE PRIMARY KEY (ID);
+-- 创建索引
+CREATE INDEX IDX_PRIVILEGE_NAMESPACEID ON APOLLO_CONFIG.PRIVILEGE (NAMESPACEID);
+CREATE INDEX IDX_PRIVILEGE_DATACHANGE_LASTTIME ON APOLLO_CONFIG.PRIVILEGE (DATACHANGE_LASTTIME);
+-- 创建自动更新时间戳的触发器
+CREATE OR REPLACE TRIGGER APOLLO_CONFIG_PRIVILEGE_UPDATE_TIMESTAMP
+BEFORE UPDATE ON APOLLO_CONFIG.PRIVILEGE
+  FOR EACH ROW
 BEGIN
-    v_millis :=
-        (EXTRACT(YEAR FROM p_timestamp) - 1970) * 31536000000 + -- 31536000000 毫秒/年
-        (EXTRACT(MONTH FROM p_timestamp) - 1) * 2592000000 +    -- 2592000000 毫秒/月（平均）
-        (EXTRACT(DAY FROM p_timestamp) - 1) * 86400000 +        -- 86400000 毫秒/天
-        EXTRACT(HOUR FROM p_timestamp) * 3600000 +              -- 3600000 毫秒/小时
-        EXTRACT(MINUTE FROM p_timestamp) * 60000 +              -- 60000 毫秒/分钟
-        ROUND(EXTRACT(SECOND FROM p_timestamp) * 1000);         -- 毫秒
-RETURN v_millis;
+  :new.DATACHANGE_LASTTIME := CURRENT_TIMESTAMP;
+END;
+/
+-- 添加注释
+COMMENT ON TABLE APOLLO_CONFIG.PRIVILEGE IS '权限表';
+COMMENT ON COLUMN APOLLO_CONFIG.PRIVILEGE.ID IS '自增Id';
+COMMENT ON COLUMN APOLLO_CONFIG.PRIVILEGE."NAME" IS '权限名称';
+COMMENT ON COLUMN APOLLO_CONFIG.PRIVILEGE.PRIVILTYPE IS '权限类型';
+COMMENT ON COLUMN APOLLO_CONFIG.PRIVILEGE.NAMESPACEID IS '所属namespace的Id';
+COMMENT ON COLUMN APOLLO_CONFIG.PRIVILEGE.ISDELETED IS '1: deleted, 0: normal';
+COMMENT ON COLUMN APOLLO_CONFIG.PRIVILEGE.DELETEDAT IS 'Delete timestamp based on milliseconds';
+------------------------------------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------------------------------------
+-- 创建自定义函数
+CREATE OR REPLACE FUNCTION APOLLO_CONFIG.UNIX_TIMESTAMP_MILLIS(p_timestamp IN TIMESTAMP WITH TIME ZONE) RETURN NUMBER IS
+    -- 距离 1970-01-01 00:00:00 UTC 的时间差。
+    -- 按 天/时/分/秒 拆开计算，避免用 "365 天/年 + 30 天/月" 近似导致的累计误差，
+    -- 同时保证结果是真实 epoch 毫秒（与 Java 的 System.currentTimeMillis() 语义一致）。
+    v_diff   INTERVAL DAY TO SECOND := p_timestamp - TIMESTAMP '1970-01-01 00:00:00' AT TIME ZONE 'UTC';
+    v_millis NUMBER;
+BEGIN
+    v_millis := (EXTRACT(DAY FROM v_diff) * 86400
+              + EXTRACT(HOUR FROM v_diff) * 3600
+              + EXTRACT(MINUTE FROM v_diff) * 60
+              + EXTRACT(SECOND FROM v_diff)) * 1000;
+    RETURN ROUND(v_millis);
 END;
 /

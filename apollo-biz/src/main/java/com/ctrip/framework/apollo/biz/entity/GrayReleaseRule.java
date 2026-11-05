@@ -27,7 +27,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "GrayReleaseRule")
-@SQLDelete(sql = "Update GrayReleaseRule set IsDeleted = 1, DeletedAt = UNIX_TIMESTAMP_MILLIS(SYSTIMESTAMP) where Id = ?")
+@SQLDelete(sql = "Update GrayReleaseRule set IsDeleted = 1, DeletedAt = UNIX_TIMESTAMP_MILLIS(CURRENT_TIMESTAMP) where ID = ?")
 @Where(clause = "IsDeleted = false")
 public class GrayReleaseRule extends BaseEntity{
 

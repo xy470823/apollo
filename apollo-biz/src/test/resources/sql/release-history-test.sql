@@ -13,7 +13,7 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 --
-INSERT INTO ReleaseHistory (Id, AppId, ClusterName, NamespaceName, BranchName, ReleaseId,
+INSERT INTO ReleaseHistory (ID, AppId, ClusterName, NamespaceName, BranchName, ReleaseId,
                               PreviousReleaseId, Operation, OperationContext,
                               DataChange_CreatedBy, DataChange_LastModifiedBy)
 VALUES (1, 'kl-app', 'default', 'application', 'default', 1, 0, 0, '{"isEmergencyPublish":false}', 'apollo', 'apollo'),
@@ -23,7 +23,7 @@ VALUES (1, 'kl-app', 'default', 'application', 'default', 1, 0, 0, '{"isEmergenc
        (5, 'kl-app', 'default', 'application', 'default', 5, 4, 0, '{"isEmergencyPublish":false}', 'apollo', 'apollo'),
        (6, 'kl-app', 'default', 'application', 'default', 6, 5, 0, '{"isEmergencyPublish":false}', 'apollo', 'apollo');
 
-INSERT INTO "Release" (Id, ReleaseKey, Name, Comment, AppId, ClusterName, NamespaceName, Configurations)
+INSERT INTO "Release" (ID, ReleaseKey, NAME, COMMENT, AppId, ClusterName, NamespaceName, Configurations)
 VALUES (1, 'TEST-RELEASE-KEY1', 'test','First Release','kl-app', 'default', 'application', '{"k1":"override-someDC-v1"}'),
        (2, 'TEST-RELEASE-KEY2', 'test','First Release','kl-app', 'default', 'application', '{"k1":"override-someDC-v1"}'),
        (3, 'TEST-RELEASE-KEY3', 'test','First Release','kl-app', 'default', 'application', '{"k1":"override-someDC-v1"}'),

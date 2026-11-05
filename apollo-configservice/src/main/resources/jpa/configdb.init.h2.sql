@@ -13,7 +13,7 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 --
-INSERT INTO "ServerConfig" ("Key", "Cluster", "Value", "Comment", "DataChange_CreatedBy", "DataChange_CreatedTime")
+INSERT INTO "ServerConfig" ("Key", "CLUSTER", "Value", "COMMENT", "DataChange_CreatedBy", "DataChange_CreatedTime")
 VALUES
     ('eureka.service.url', 'default', 'http://localhost:8080/eureka/', 'Eureka服务Url，多个service以英文逗号分隔', 'default', '1970-01-01 00:00:00'),
     ('namespace.lock.switch', 'default', 'false', '一次发布只能有一个人修改开关', 'default', '1970-01-01 00:00:00'),

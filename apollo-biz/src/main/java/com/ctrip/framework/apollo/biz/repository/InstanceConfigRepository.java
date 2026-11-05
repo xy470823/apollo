@@ -47,15 +47,18 @@ public interface InstanceConfigRepository extends PagingAndSortingRepository<Ins
   @Query("delete from InstanceConfig  where ConfigAppId=?1 and ConfigClusterName=?2 and ConfigNamespaceName = ?3")
   int batchDelete(String appId, String clusterName, String namespaceName);
 
+  /**
+   * Note: identifiers must not be quoted with backticks (MySQL only), Oracle would raise ORA-00904.
+   */
   @Query(
-      value = "select b.Id from InstanceConfig a inner join Instance b on b.Id =" +
-          " a.`InstanceId` where a.`ConfigAppId` = :configAppId and a.`ConfigClusterName` = " +
-          ":clusterName and a.`ConfigNamespaceName` = :namespaceName and a.`DataChange_LastTime` " +
-          "> :validDate and b.`AppId` = :instanceAppId",
-      countQuery = "select count(1) from InstanceConfig a inner join Instance b on b.Id =" +
-          " a.`InstanceId` where a.`ConfigAppId` = :configAppId and a.`ConfigClusterName` = " +
-          ":clusterName and a.`ConfigNamespaceName` = :namespaceName and a.`DataChange_LastTime` " +
-          "> :validDate and b.`AppId` = :instanceAppId",
+      value = "select b.ID from InstanceConfig a inner join Instance b on b.ID =" +
+          " a.InstanceId where a.ConfigAppId = :configAppId and a.ConfigClusterName = " +
+          ":clusterName and a.ConfigNamespaceName = :namespaceName and a.DataChange_LastTime " +
+          "> :validDate and b.AppId = :instanceAppId",
+      countQuery = "select count(1) from InstanceConfig a inner join Instance b on b.ID =" +
+          " a.InstanceId where a.ConfigAppId = :configAppId and a.ConfigClusterName = " +
+          ":clusterName and a.ConfigNamespaceName = :namespaceName and a.DataChange_LastTime " +
+          "> :validDate and b.AppId = :instanceAppId",
       nativeQuery = true)
   Page<Object> findInstanceIdsByNamespaceAndInstanceAppId(
       @Param("instanceAppId") String instanceAppId, @Param("configAppId") String configAppId,

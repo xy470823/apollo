@@ -38,7 +38,7 @@ CREATE TABLE SPRING_SESSION_ATTRIBUTES
     CONSTRAINT SPRING_SESSION_ATTRIBUTES_FK FOREIGN KEY (SESSION_PRIMARY_ID) REFERENCES SPRING_SESSION (PRIMARY_ID) ON DELETE CASCADE
 );
 
-INSERT INTO "ServerConfig" ("Key", "Value", "Comment", "DataChange_CreatedBy", "DataChange_CreatedTime")
+INSERT INTO "ServerConfig" ("Key", "Value", "COMMENT", "DataChange_CreatedBy", "DataChange_CreatedTime")
 VALUES
     ('apollo.portal.envs', 'dev', '可支持的环境列表', 'default', '1970-01-01 00:00:00'),
     ('organizations', '[{"orgId":"TEST1","orgName":"样例部门1"},{"orgId":"TEST2","orgName":"样例部门2"}]', '部门列表', 'default', '1970-01-01 00:00:00'),

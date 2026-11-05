@@ -14,9 +14,9 @@
 -- limitations under the License.
 --
 
-INSERT INTO "Namespace" (`Id`, `AppId`, `ClusterName`, `NamespaceName`, `IsDeleted`, `DataChange_CreatedBy`, `DataChange_LastModifiedBy`)VALUES(1,'testApp', 'default', 'application', 0, 'apollo', 'apollo');
+INSERT INTO "Namespace" (`ID`, `AppId`, `ClusterName`, `NamespaceName`, `IsDeleted`, `DataChange_CreatedBy`, `DataChange_LastModifiedBy`)VALUES(1,'testApp', 'default', 'application', 0, 'apollo', 'apollo');
 
-INSERT INTO "Item" (`Id`, `NamespaceId`, "Key", "Type", "Value", `Comment`, `LineNum`)
+INSERT INTO "Item" (`ID`, `NamespaceId`, "Key", "Type", "Value", `COMMENT`, `LineNum`)
     VALUES
         (9901, 1, 'k1', 0, 'v1', '', 1),
         (9902, 1, 'k2', 2, 'v2', '', 2),
