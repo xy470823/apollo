@@ -1,3 +1,18 @@
+-- ===============================================================================
+-- Apollo PortalDB 建库脚本（Oracle 23c）
+--
+-- 用法：用业务账号（表空间属主）直接执行本文件，如：
+--     sqlplus APOLLO_PORTAL/******@//host:1521/orclpdb @scripts/sql/src/apolloportaldb.sql
+--
+-- 注意：
+--   1) 下面的 CREATE TABLESPACE / CREATE USER / GRANT 默认已注释，需要新建表空间/用户时，
+--      用 DBA 身份取消注释后执行（同时请修改数据文件路径）；
+--   2) 必须执行到文件末尾的 UNIX_TIMESTAMP_MILLIS 函数（软删除逻辑依赖它）；
+--   3) 本脚本已对转 Oracle 保留字加双引号（"AUDIT"、"CLUSTER"、"COMMENT"、"NAME"、"MODE"、"KEY" 等），
+--      并与实体映射保持一致；
+--   4) 本脚本不包含 DROP TABLE，重复执行会报 "table already exists"。
+-- ===============================================================================
+
 -- 删除用户及TABLESPACE
 -- ALTER TABLESPACE APOLLO_PORTAL_TABLESPACE OFFLINE;
 -- DROP USER APOLLO_PORTAL CASCADE;
@@ -7,9 +22,9 @@
 
 ------------------------------------------------------------------------------------------------------------------------
 -- 创建TABLESPACE以及对应的dbf文件初始大小
-CREATE TABLESPACE APOLLO_PORTAL_TABLESPACE DATAFILE '/opt/oracle/oradata/ORCL/ORCLPDB/APOLLO_PORTAL_TABLESPACE.dbf' SIZE 5G AUTOEXTEND OFF;
-CREATE USER APOLLO_PORTAL IDENTIFIED BY 123456 DEFAULT TABLESPACE APOLLO_PORTAL_TABLESPACE;
-GRANT CONNECT,RESOURCE,UNLIMITED TABLESPACE TO APOLLO_PORTAL;
+-- CREATE TABLESPACE APOLLO_PORTAL_TABLESPACE DATAFILE '/opt/oracle/oradata/ORCL/ORCLPDB/APOLLO_PORTAL_TABLESPACE.dbf' SIZE 5G AUTOEXTEND OFF;
+-- CREATE USER APOLLO_PORTAL IDENTIFIED BY 123456 DEFAULT TABLESPACE APOLLO_PORTAL_TABLESPACE;
+-- GRANT CONNECT,RESOURCE,UNLIMITED TABLESPACE TO APOLLO_PORTAL;
 ------------------------------------------------------------------------------------------------------------------------
 
 

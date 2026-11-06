@@ -27,7 +27,7 @@ public class ApolloSqlConverter {
 
   public static void main(String[] args) {
     String repositoryDir = ApolloSqlConverterUtil.getRepositoryDir();
-    String srcDir = repositoryDir + "/scripts/sql/src";
+    String srcDir = repositoryDir + ApolloSqlConverterUtil.MYSQL_SRC_DIR;
     String targetParentDir = repositoryDir + "/scripts";
 
     SqlTemplateGist gists = ApolloSqlConverterUtil.getGists(repositoryDir);

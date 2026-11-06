@@ -33,7 +33,7 @@ class ApolloSqlConverterH2Test {
   void checkH2() {
     String repositoryDir = ApolloSqlConverterUtil.getRepositoryDir();
 
-    String srcDir = repositoryDir + "/scripts/sql/src";
+    String srcDir = repositoryDir + ApolloSqlConverterUtil.MYSQL_SRC_DIR;
     String checkerParentDir =
         repositoryDir + "/apollo-build-sql-converter/target/scripts/sql/checker-h2";
 
