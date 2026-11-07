@@ -124,6 +124,15 @@ public class AppService {
     return appRepository.findByOwnerName(ownerName, page);
   }
 
+  public List<App> findByOrgId(String orgId, Pageable page) {
+    return appRepository.findByOrgId(orgId, page);
+  }
+
+  public PageDTO<App> searchByOrgIdAndAppIdOrName(String orgId, String query, Pageable pageable) {
+    Page<App> apps = appRepository.findByOrgIdAndAppIdContainingOrNameContaining(orgId, query, pageable);
+    return new PageDTO<>(apps.getContent(), pageable, apps.getTotalElements());
+  }
+
   public App load(String appId) {
     return appRepository.findByAppId(appId);
   }

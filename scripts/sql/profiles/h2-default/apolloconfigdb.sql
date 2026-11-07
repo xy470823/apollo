@@ -1,3 +1,45 @@
+--
+-- Copyright 2024 Apollo Authors
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+-- http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
+--
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+-- 
+-- ===============================================================================
+-- ==                                                                           ==
+-- ==                     Generated from 'scripts/sql/src/'                     ==
+-- == by running 'mvn compile -pl apollo-build-sql-converter -Psql-converter'.  ==
+-- ==                              DO NOT EDIT !!!                              ==
+-- ==                                                                           ==
+-- ===============================================================================
+-- 
+
+-- H2 Function
+-- ------------------------------------------------------------
+CREATE ALIAS IF NOT EXISTS UNIX_TIMESTAMP FOR "com.ctrip.framework.apollo.common.jpa.H2Function.unixTimestamp";
+CREATE ALIAS IF NOT EXISTS UNIX_TIMESTAMP_MILLIS FOR "com.ctrip.framework.apollo.common.jpa.H2Function.unixTimestampMillis";
+
+-- 
+
+-- Dump of table app
+-- ------------------------------------------------------------
 
 CREATE TABLE `App` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
@@ -14,9 +56,9 @@ CREATE TABLE `App` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  UNIQUE KEY App_UK_AppId_DeletedAt` (`AppId`,`DeletedAt`),
-  KEY App_DataChange_LastTime` (`DataChange_LastTime`),
-  KEY App_IX_Name` (`NAME`)
+  UNIQUE KEY `App_UK_AppId_DeletedAt` (`AppId`,`DeletedAt`),
+  KEY `App_DataChange_LastTime` (`DataChange_LastTime`),
+  KEY `App_IX_Name` (`NAME`)
 )   COMMENT='应用表';
 
 
@@ -38,9 +80,9 @@ CREATE TABLE `AppNamespace` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  UNIQUE KEY AppNamespace_UK_AppId_Name_DeletedAt` (`AppId`,`NAME`,`DeletedAt`),
-  KEY AppNamespace_Name_AppId` (`NAME`,`AppId`),
-  KEY AppNamespace_DataChange_LastTime` (`DataChange_LastTime`)
+  UNIQUE KEY `AppNamespace_UK_AppId_Name_DeletedAt` (`AppId`,`NAME`,`DeletedAt`),
+  KEY `AppNamespace_Name_AppId` (`NAME`,`AppId`),
+  KEY `AppNamespace_DataChange_LastTime` (`DataChange_LastTime`)
 )   COMMENT='应用namespace定义';
 
 
@@ -61,7 +103,7 @@ CREATE TABLE `AUDIT` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  KEY AUDIT_DataChange_LastTime` (`DataChange_LastTime`)
+  KEY `AUDIT_DataChange_LastTime` (`DataChange_LastTime`)
 )   COMMENT='日志审计表';
 
 
@@ -82,9 +124,9 @@ CREATE TABLE `CLUSTER` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  UNIQUE KEY CLUSTER_UK_AppId_Name_DeletedAt` (`AppId`,`NAME`,`DeletedAt`),
-  KEY CLUSTER_IX_ParentClusterId` (`ParentClusterId`),
-  KEY CLUSTER_DataChange_LastTime` (`DataChange_LastTime`)
+  UNIQUE KEY `CLUSTER_UK_AppId_Name_DeletedAt` (`AppId`,`NAME`,`DeletedAt`),
+  KEY `CLUSTER_IX_ParentClusterId` (`ParentClusterId`),
+  KEY `CLUSTER_DataChange_LastTime` (`DataChange_LastTime`)
 )   COMMENT='集群';
 
 
@@ -106,10 +148,10 @@ CREATE TABLE `Commit` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  KEY Commit_DataChange_LastTime` (`DataChange_LastTime`),
-  KEY Commit_AppId` (`AppId`),
-  KEY Commit_ClusterName` (`ClusterName`),
-  KEY Commit_NamespaceName` (`NamespaceName`)
+  KEY `Commit_DataChange_LastTime` (`DataChange_LastTime`),
+  KEY `Commit_AppId` (`AppId`),
+  KEY `Commit_ClusterName` (`ClusterName`),
+  KEY `Commit_NamespaceName` (`NamespaceName`)
 )   COMMENT='commit 历史表';
 
 -- Dump of table grayreleaserule
@@ -131,8 +173,8 @@ CREATE TABLE `GrayReleaseRule` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  KEY GrayReleaseRule_DataChange_LastTime` (`DataChange_LastTime`),
-  KEY GrayReleaseRule_IX_Namespace` (`AppId`,`ClusterName`,`NamespaceName`)
+  KEY `GrayReleaseRule_DataChange_LastTime` (`DataChange_LastTime`),
+  KEY `GrayReleaseRule_IX_Namespace` (`AppId`,`ClusterName`,`NamespaceName`)
 )   COMMENT='灰度规则表';
 
 
@@ -148,9 +190,9 @@ CREATE TABLE `Instance` (
   `DataChange_CreatedTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `DataChange_LastTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  UNIQUE KEY Instance_IX_UNIQUE_KEY` (`AppId`,`ClusterName`,`Ip`,`DataCenter`),
-  KEY Instance_IX_IP` (`Ip`),
-  KEY Instance_IX_DataChange_LastTime` (`DataChange_LastTime`)
+  UNIQUE KEY `Instance_IX_UNIQUE_KEY` (`AppId`,`ClusterName`,`Ip`,`DataCenter`),
+  KEY `Instance_IX_IP` (`Ip`),
+  KEY `Instance_IX_DataChange_LastTime` (`DataChange_LastTime`)
 )   COMMENT='使用配置的应用实例';
 
 
@@ -169,10 +211,10 @@ CREATE TABLE `InstanceConfig` (
   `DataChange_CreatedTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `DataChange_LastTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  UNIQUE KEY InstanceConfig_IX_UNIQUE_KEY` (`InstanceId`,`ConfigAppId`,`ConfigNamespaceName`),
-  KEY InstanceConfig_IX_ReleaseKey` (`ReleaseKey`),
-  KEY InstanceConfig_IX_DataChange_LastTime` (`DataChange_LastTime`),
-  KEY InstanceConfig_IX_Valid_Namespace` (`ConfigAppId`,`ConfigClusterName`,`ConfigNamespaceName`,`DataChange_LastTime`)
+  UNIQUE KEY `InstanceConfig_IX_UNIQUE_KEY` (`InstanceId`,`ConfigAppId`,`ConfigNamespaceName`),
+  KEY `InstanceConfig_IX_ReleaseKey` (`ReleaseKey`),
+  KEY `InstanceConfig_IX_DataChange_LastTime` (`DataChange_LastTime`),
+  KEY `InstanceConfig_IX_Valid_Namespace` (`ConfigAppId`,`ConfigClusterName`,`ConfigNamespaceName`,`DataChange_LastTime`)
 )   COMMENT='应用实例的配置信息';
 
 
@@ -195,8 +237,8 @@ CREATE TABLE `Item` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  KEY Item_IX_GroupId` (`NamespaceId`),
-  KEY Item_DataChange_LastTime` (`DataChange_LastTime`)
+  KEY `Item_IX_GroupId` (`NamespaceId`),
+  KEY `Item_DataChange_LastTime` (`DataChange_LastTime`)
 )   COMMENT='配置项目';
 
 
@@ -216,9 +258,9 @@ CREATE TABLE `Namespace` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  UNIQUE KEY Namespace_UK_AppId_ClusterName_NamespaceName_DeletedAt` (`AppId`,`ClusterName`,`NamespaceName`,`DeletedAt`),
-  KEY Namespace_DataChange_LastTime` (`DataChange_LastTime`),
-  KEY Namespace_IX_NamespaceName` (`NamespaceName`)
+  UNIQUE KEY `Namespace_UK_AppId_ClusterName_NamespaceName_DeletedAt` (`AppId`,`ClusterName`,`NamespaceName`,`DeletedAt`),
+  KEY `Namespace_DataChange_LastTime` (`DataChange_LastTime`),
+  KEY `Namespace_IX_NamespaceName` (`NamespaceName`)
 )   COMMENT='命名空间';
 
 
@@ -236,8 +278,8 @@ CREATE TABLE `NamespaceLock` (
   `IsDeleted` boolean DEFAULT FALSE COMMENT '软删除',
   `DeletedAt` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'Delete timestamp based on milliseconds',
   PRIMARY KEY (`ID`),
-  UNIQUE KEY NamespaceLock_UK_NamespaceId_DeletedAt` (`NamespaceId`,`DeletedAt`),
-  KEY NamespaceLock_DataChange_LastTime` (`DataChange_LastTime`)
+  UNIQUE KEY `NamespaceLock_UK_NamespaceId_DeletedAt` (`NamespaceId`,`DeletedAt`),
+  KEY `NamespaceLock_DataChange_LastTime` (`DataChange_LastTime`)
 )   COMMENT='namespace的编辑锁';
 
 
@@ -262,9 +304,9 @@ CREATE TABLE `Release` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  UNIQUE KEY Release_UK_ReleaseKey_DeletedAt` (`ReleaseKey`,`DeletedAt`),
-  KEY Release_AppId_ClusterName_GroupName` (`AppId`,`ClusterName`,`NamespaceName`),
-  KEY Release_DataChange_LastTime` (`DataChange_LastTime`)
+  UNIQUE KEY `Release_UK_ReleaseKey_DeletedAt` (`ReleaseKey`,`DeletedAt`),
+  KEY `Release_AppId_ClusterName_GroupName` (`AppId`,`ClusterName`,`NamespaceName`),
+  KEY `Release_DataChange_LastTime` (`DataChange_LastTime`)
 )   COMMENT='发布';
 
 
@@ -288,10 +330,10 @@ CREATE TABLE `ReleaseHistory` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  KEY ReleaseHistory_IX_Namespace` (`AppId`,`ClusterName`,`NamespaceName`,`BranchName`),
-  KEY ReleaseHistory_IX_ReleaseId` (`ReleaseId`),
-  KEY ReleaseHistory_IX_DataChange_LastTime` (`DataChange_LastTime`),
-  KEY ReleaseHistory_IX_PreviousReleaseId` (`PreviousReleaseId`)
+  KEY `ReleaseHistory_IX_Namespace` (`AppId`,`ClusterName`,`NamespaceName`,`BranchName`),
+  KEY `ReleaseHistory_IX_ReleaseId` (`ReleaseId`),
+  KEY `ReleaseHistory_IX_DataChange_LastTime` (`DataChange_LastTime`),
+  KEY `ReleaseHistory_IX_PreviousReleaseId` (`PreviousReleaseId`)
 )   COMMENT='发布历史';
 
 
@@ -303,8 +345,8 @@ CREATE TABLE `ReleaseMessage` (
   `Message` varchar(1024) NOT NULL DEFAULT '' COMMENT '发布的消息内容',
   `DataChange_LastTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  KEY ReleaseMessage_DataChange_LastTime` (`DataChange_LastTime`),
-  KEY ReleaseMessage_IX_Message` (`Message`)
+  KEY `ReleaseMessage_DataChange_LastTime` (`DataChange_LastTime`),
+  KEY `ReleaseMessage_IX_Message` (`Message`)
 )   COMMENT='发布消息';
 
 
@@ -325,8 +367,8 @@ CREATE TABLE `ServerConfig` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  UNIQUE KEY ServerConfig_UK_Key_Cluster_DeletedAt` (`Key`,`CLUSTER`,`DeletedAt`),
-  KEY ServerConfig_DataChange_LastTime` (`DataChange_LastTime`)
+  UNIQUE KEY `ServerConfig_UK_Key_Cluster_DeletedAt` (`Key`,`CLUSTER`,`DeletedAt`),
+  KEY `ServerConfig_DataChange_LastTime` (`DataChange_LastTime`)
 )   COMMENT='配置服务自身配置';
 
 -- Dump of table accesskey
@@ -345,8 +387,8 @@ CREATE TABLE `AccessKey` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  UNIQUE KEY AccessKey_UK_AppId_Secret_DeletedAt` (`AppId`,`Secret`,`DeletedAt`),
-  KEY AccessKey_DataChange_LastTime` (`DataChange_LastTime`)
+  UNIQUE KEY `AccessKey_UK_AppId_Secret_DeletedAt` (`AppId`,`Secret`,`DeletedAt`),
+  KEY `AccessKey_DataChange_LastTime` (`DataChange_LastTime`)
 )   COMMENT='访问密钥';
 
 
@@ -386,10 +428,10 @@ CREATE TABLE `AuditLog` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  KEY AuditLog_IX_TraceId` (`TraceId`),
-  KEY AuditLog_IX_OpName` (`OpName`),
-  KEY AuditLog_IX_DataChange_CreatedTime` (`DataChange_CreatedTime`),
-  KEY AuditLog_IX_Operator` (`Operator`)
+  KEY `AuditLog_IX_TraceId` (`TraceId`),
+  KEY `AuditLog_IX_OpName` (`OpName`),
+  KEY `AuditLog_IX_DataChange_CreatedTime` (`DataChange_CreatedTime`),
+  KEY `AuditLog_IX_Operator` (`Operator`)
 )   COMMENT='审计日志表';
 
 -- Dump of table AuditLogDataInfluence
@@ -410,9 +452,9 @@ CREATE TABLE `AuditLogDataInfluence` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  KEY AuditLogDataInfluence_IX_SpanId` (`SpanId`),
-  KEY AuditLogDataInfluence_IX_DataChange_CreatedTime` (`DataChange_CreatedTime`),
-  KEY AuditLogDataInfluence_IX_EntityId` (`InfluenceEntityId`)
+  KEY `AuditLogDataInfluence_IX_SpanId` (`SpanId`),
+  KEY `AuditLogDataInfluence_IX_DataChange_CreatedTime` (`DataChange_CreatedTime`),
+  KEY `AuditLogDataInfluence_IX_EntityId` (`InfluenceEntityId`)
 )   COMMENT='审计日志数据变动表';
 
 -- Config
@@ -424,3 +466,19 @@ VALUES
     ('item.key.length.limit', 'default', '128', 'item key 最大长度限制'),
     ('item.value.length.limit', 'default', '20000', 'item value最大长度限制'),
     ('config-service.cache.enabled', 'default', 'false', 'ConfigService是否开启缓存，开启后能提高性能，但是会增大内存消耗！');
+
+-- 
+-- ===============================================================================
+-- ==                                                                           ==
+-- ==                     Generated from 'scripts/sql/src/'                     ==
+-- == by running 'mvn compile -pl apollo-build-sql-converter -Psql-converter'.  ==
+-- ==                              DO NOT EDIT !!!                              ==
+-- ==                                                                           ==
+-- ===============================================================================
+
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

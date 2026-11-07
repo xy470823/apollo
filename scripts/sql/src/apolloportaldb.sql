@@ -572,50 +572,62 @@ COMMENT ON COLUMN  APOLLO_PORTAL.USERROLE.DATACHANGE_LASTTIME IS '最后修改�
 
 
 ------------------------------------------------------------------------------------------------------------------------
-CREATE TABLE APOLLO_PORTAL.USERS (
-    ID NUMBER(10) GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1) NOT NULL,
-    USERNAME VARCHAR2(64) DEFAULT 'default' NOT NULL,
-    PASSWORD VARCHAR2(512) DEFAULT 'default' NOT NULL,
-    USERDISPLAYNAME VARCHAR2(512) DEFAULT 'default' NOT NULL,
-    EMAIL VARCHAR2(64) DEFAULT 'default' NOT NULL,
-    ENABLED NUMBER(4) DEFAULT NULL,
-    CONSTRAINT PK_P_USERS PRIMARY KEY (ID),
-    CONSTRAINT UK_P_USERS UNIQUE (USERNAME)
+CREATE TABLE APOLLO_PORTAL."Users" (
+    "Id" NUMBER(10) GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1) NOT NULL,
+    "Username" VARCHAR2(64) DEFAULT 'default' NOT NULL,
+    "Password" VARCHAR2(512) DEFAULT 'default' NOT NULL,
+    "UserDisplayName" VARCHAR2(512) DEFAULT 'default' NOT NULL,
+    "Email" VARCHAR2(64) DEFAULT 'default' NOT NULL,
+    "Enabled" NUMBER(4) DEFAULT NULL,
+    CONSTRAINT PK_P_USERS PRIMARY KEY ("Id"),
+    CONSTRAINT UK_P_USERS UNIQUE ("Username")
 ) tablespace APOLLO_PORTAL_TABLESPACE
   pctfree 10
   initrans 1
   maxtrans 255;
 -- 创建触发器
-CREATE OR REPLACE TRIGGER APOLLO_PORTAL_USERS_UPDATE_TIMESTAMP
-BEFORE UPDATE ON APOLLO_PORTAL.USERS FOR EACH ROW
-BEGIN
-  :new.DATACHANGE_LASTTIME := CURRENT_TIMESTAMP;
-END;
-/
-COMMENT ON TABLE APOLLO_PORTAL.USERS IS '用户表';
-COMMENT ON COLUMN APOLLO_PORTAL.USERS.ID IS '自增Id';
-COMMENT ON COLUMN APOLLO_PORTAL.USERS.USERNAME IS '用户登录账户';
-COMMENT ON COLUMN APOLLO_PORTAL.USERS.PASSWORD IS '密码';
-COMMENT ON COLUMN APOLLO_PORTAL.USERS.USERDISPLAYNAME IS '用户名称';
-COMMENT ON COLUMN APOLLO_PORTAL.USERS.EMAIL IS '邮箱地址';
-COMMENT ON COLUMN APOLLO_PORTAL.USERS.ENABLED IS '是否有效';
+COMMENT ON TABLE APOLLO_PORTAL."Users" IS '用户表';
+COMMENT ON COLUMN APOLLO_PORTAL."Users"."Id" IS '自增Id';
+COMMENT ON COLUMN APOLLO_PORTAL."Users"."Username" IS '用户登录账户';
+COMMENT ON COLUMN APOLLO_PORTAL."Users"."Password" IS '密码';
+COMMENT ON COLUMN APOLLO_PORTAL."Users"."UserDisplayName" IS '用户名称';
+COMMENT ON COLUMN APOLLO_PORTAL."Users"."Email" IS '邮箱地址';
+COMMENT ON COLUMN APOLLO_PORTAL."Users"."Enabled" IS '是否有效';
 ------------------------------------------------------------------------------------------------------------------------
 
 
 ------------------------------------------------------------------------------------------------------------------------
-CREATE TABLE APOLLO_PORTAL.AUTHORITIES (
-    ID NUMBER(11) GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1) NOT NULL,
-    USERNAME VARCHAR2(64) NOT NULL,
-    AUTHORITY VARCHAR2(50) NOT NULL,
-    CONSTRAINT PK_P_AUTHORITIES PRIMARY KEY (ID)
+CREATE TABLE APOLLO_PORTAL."Authorities" (
+    "Id" NUMBER(11) GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1) NOT NULL,
+    "Username" VARCHAR2(64) NOT NULL,
+    "Authority" VARCHAR2(50) NOT NULL,
+    CONSTRAINT PK_P_AUTHORITIES PRIMARY KEY ("Id")
 ) tablespace APOLLO_PORTAL_TABLESPACE
   pctfree 10
   initrans 1
   maxtrans 255;
-COMMENT ON TABLE APOLLO_PORTAL.AUTHORITIES IS '用户权限表';
-COMMENT ON COLUMN APOLLO_PORTAL.AUTHORITIES.ID IS '自增Id';
-COMMENT ON COLUMN APOLLO_PORTAL.AUTHORITIES.USERNAME IS '用户名';
-COMMENT ON COLUMN APOLLO_PORTAL.AUTHORITIES.AUTHORITY IS '权限名称';
+COMMENT ON TABLE APOLLO_PORTAL."Authorities" IS '用户权限表';
+COMMENT ON COLUMN APOLLO_PORTAL."Authorities"."Id" IS '自增Id';
+COMMENT ON COLUMN APOLLO_PORTAL."Authorities"."Username" IS '用户名';
+COMMENT ON COLUMN APOLLO_PORTAL."Authorities"."Authority" IS '权限名称';
+------------------------------------------------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------------------------------------------------
+CREATE TABLE APOLLO_PORTAL."UserOrg" (
+    "Id" NUMBER(11) GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1) NOT NULL,
+    "Username" VARCHAR2(64) NOT NULL,
+    "OrgId" VARCHAR2(128) NOT NULL,
+    CONSTRAINT PK_P_USERORG PRIMARY KEY ("Id"),
+    CONSTRAINT UK_P_USERORG UNIQUE ("Username", "OrgId")
+) tablespace APOLLO_PORTAL_TABLESPACE
+  pctfree 10
+  initrans 1
+  maxtrans 255;
+COMMENT ON TABLE APOLLO_PORTAL."UserOrg" IS '用户与部门关联表';
+COMMENT ON COLUMN APOLLO_PORTAL."UserOrg"."Id" IS '自增Id';
+COMMENT ON COLUMN APOLLO_PORTAL."UserOrg"."Username" IS '用户名';
+COMMENT ON COLUMN APOLLO_PORTAL."UserOrg"."OrgId" IS '部门Id';
 ------------------------------------------------------------------------------------------------------------------------
 
 
@@ -779,9 +791,9 @@ INSERT INTO APOLLO_PORTAL.SERVERCONFIG (KEY, VALUE, "COMMENT") VALUES ('admin.cr
 INSERT INTO APOLLO_PORTAL.SERVERCONFIG (KEY, VALUE, "COMMENT") VALUES ('configView.memberOnly.envs', 'pro', '只对项目成员显示配置信息的环境列表，多个env以英文逗号分隔');
 INSERT INTO APOLLO_PORTAL.SERVERCONFIG (KEY, VALUE, "COMMENT") VALUES ('apollo.portal.meta.servers', '{}', '各环境Meta Service列表');
 
-INSERT INTO APOLLO_PORTAL.USERS (USERNAME, PASSWORD, USERDISPLAYNAME, EMAIL, ENABLED) VALUES ('apollo', '$2a$10$7r20uS.BQ9uBpf3Baj3uQOZvMVvB1RN3PYoKE94gtz2.WAOuiiwXS', 'apollo', 'apollo@acme.com', 1);
+INSERT INTO APOLLO_PORTAL."Users" ("Username", "Password", "UserDisplayName", "Email", "Enabled") VALUES ('apollo', '$2a$10$7r20uS.BQ9uBpf3Baj3uQOZvMVvB1RN3PYoKE94gtz2.WAOuiiwXS', 'apollo', 'apollo@acme.com', 1);
 
-INSERT INTO APOLLO_PORTAL.AUTHORITIES (USERNAME, AUTHORITY) VALUES ('apollo', 'ROLE_user');
+INSERT INTO APOLLO_PORTAL."Authorities" ("Username", "Authority") VALUES ('apollo', 'ROLE_user');
 COMMIT;
 
 

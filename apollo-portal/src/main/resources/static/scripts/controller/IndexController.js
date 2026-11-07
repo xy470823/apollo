@@ -15,15 +15,18 @@
  *
  */
 index_module.controller('IndexController', ['$scope', '$window', '$translate', 'toastr', 'AppUtil', 'AppService',
-    'UserService', 'FavoriteService', 'NamespaceService',
+    'UserService', 'FavoriteService', 'NamespaceService', 'OrganizationService',
     IndexController]
 )
 
 
-function IndexController($scope, $window, $translate, toastr, AppUtil, AppService, UserService, FavoriteService, NamespaceService) {
+function IndexController($scope, $window, $translate, toastr, AppUtil, AppService, UserService, FavoriteService, NamespaceService, OrganizationService) {
 
     $scope.userId = '';
     $scope.whichContent = '1';
+    $scope.userOrgs = [];
+    $scope.orgList = [];
+    $scope.currentOrgId = '';
 
     $scope.getUserCreatedApps = getUserCreatedApps;
     $scope.getUserFavorites = getUserFavorites;
@@ -35,6 +38,7 @@ function IndexController($scope, $window, $translate, toastr, AppUtil, AppServic
     $scope.deleteFavorite = deleteFavorite;
     $scope.morePublicNamespace = morePublicNamespace;
     $scope.changeContent = changeContent;
+    $scope.switchOrg = switchOrg;
 
     function initCreateApplicationPermission() {
         AppService.has_create_application_role($scope.userId).then(
@@ -49,6 +53,7 @@ function IndexController($scope, $window, $translate, toastr, AppUtil, AppServic
 
     UserService.load_user().then(function (result) {
         $scope.userId = result.userId;
+        $scope.userOrgs = result.orgIds || [];
 
         $scope.createdAppPage = 0;
         $scope.createdApps = [];
@@ -64,7 +69,7 @@ function IndexController($scope, $window, $translate, toastr, AppUtil, AppServic
 
         initCreateApplicationPermission();
 
-        getUserCreatedApps();
+        initOrgSwitch();
 
         getUserFavorites();
 
@@ -73,6 +78,40 @@ function IndexController($scope, $window, $translate, toastr, AppUtil, AppServic
         initUserVisitedApps();
 
     });
+
+    function initOrgSwitch() {
+        // 加载全部部门，用于把 orgId 映射为 orgName 展示
+        OrganizationService.find_organizations().then(function (orgs) {
+            $scope.orgList = orgs;
+            // 当前登录部门
+            UserService.getCurrentOrg().then(function (res) {
+                $scope.currentOrgId = res.orgId || '';
+                // 若登录时未选部门但用户有部门，默认取第一个
+                if (!$scope.currentOrgId && $scope.userOrgs.length > 0) {
+                    $scope.currentOrgId = $scope.userOrgs[0];
+                    UserService.switchCurrentOrg($scope.currentOrgId);
+                }
+                // 刷新应用列表（按部门）
+                getUserCreatedApps();
+            });
+        });
+    }
+
+    function switchOrg(orgId) {
+        if (!orgId) {
+            return;
+        }
+        UserService.switchCurrentOrg(orgId).then(function () {
+            $scope.currentOrgId = orgId;
+            // 重置分页并刷新应用列表
+            $scope.createdAppPage = 0;
+            $scope.createdApps = [];
+            $scope.hasMoreCreatedApps = false;
+            getUserCreatedApps();
+        }, function (result) {
+            toastr.warning(AppUtil.errorMsg(result), $translate.instant('Index.SwitchDepartmentFailed'));
+        });
+    }
 
     function getUserCreatedApps() {
         var size = 10;

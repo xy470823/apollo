@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 import com.ctrip.framework.apollo.common.dto.NamespaceDTO;
 import com.ctrip.framework.apollo.common.dto.PageDTO;
 import com.ctrip.framework.apollo.common.entity.App;
+import com.ctrip.framework.apollo.portal.component.LoginOrgHolder;
 import com.ctrip.framework.apollo.portal.component.PortalSettings;
 import com.ctrip.framework.apollo.portal.component.config.PortalConfig;
 import com.ctrip.framework.apollo.portal.environment.Env;
@@ -46,25 +47,35 @@ public class SearchController {
   private PortalSettings   portalSettings;
   private NamespaceService namespaceService;
   private PortalConfig     portalConfig;
+  private LoginOrgHolder   loginOrgHolder;
 
   public SearchController(final AppService appService,
                           final PortalSettings portalSettings,
                           final PortalConfig portalConfig,
-                          final NamespaceService namespaceService) {
+                          final NamespaceService namespaceService,
+                          final LoginOrgHolder loginOrgHolder) {
     this.appService = appService;
     this.portalConfig = portalConfig;
     this.portalSettings = portalSettings;
     this.namespaceService = namespaceService;
+    this.loginOrgHolder = loginOrgHolder;
   }
 
   @GetMapping("/apps/search/by-appid-or-name")
   public PageDTO<App> search(@RequestParam(value = "query", required = false) String query, Pageable pageable) {
-    if (StringUtils.isEmpty(query)) {
-      return appService.findAll(pageable);
+    String loginOrgId = loginOrgHolder.getLoginOrgId();
+
+    // 未选择登录部门时返回空，避免跨部门搜索
+    if (StringUtils.isEmpty(loginOrgId)) {
+      return new PageDTO<>(Lists.newLinkedList(), pageable, 0);
     }
 
-    //search app
-    PageDTO<App> appPageDTO = appService.searchByAppIdOrAppName(query, pageable);
+    if (StringUtils.isEmpty(query)) {
+      return appService.searchByOrgIdAndAppIdOrName(loginOrgId, "", pageable);
+    }
+
+    //search app，仅限当前登录部门
+    PageDTO<App> appPageDTO = appService.searchByOrgIdAndAppIdOrName(loginOrgId, query, pageable);
     if (appPageDTO.hasContent()) {
       return appPageDTO;
     }

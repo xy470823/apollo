@@ -34,11 +34,16 @@ public interface AppRepository extends PagingAndSortingRepository<App, Long> {
 
   List<App> findByOwnerName(String ownerName, Pageable page);
 
+  List<App> findByOrgId(String orgId, Pageable pageable);
+
   List<App> findByAppIdIn(Set<String> appIds);
 
   List<App> findByAppIdIn(Set<String> appIds, Pageable pageable);
 
   Page<App> findByAppIdContainingOrNameContaining(String appId, String name, Pageable pageable);
+
+  @Query("SELECT a FROM App a WHERE a.orgId = ?1 AND (a.appId LIKE %?2% OR a.name LIKE %?2%)")
+  Page<App> findByOrgIdAndAppIdContainingOrNameContaining(String orgId, String query, Pageable pageable);
 
   @Modifying
   @Query("UPDATE App SET IsDeleted = 1, DeletedAt = UNIX_TIMESTAMP_MILLIS(CURRENT_TIMESTAMP), DataChange_LastModifiedBy = ?2 WHERE AppId=?1 and IsDeleted = false")

@@ -18,34 +18,39 @@ package com.ctrip.framework.apollo.portal.entity.po;
 
 import com.ctrip.framework.apollo.portal.entity.bo.UserInfo;
 
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * @author lepdou 2017-04-08
  */
 @Entity
-@Table(name = "Users")
+@Table(name = "\"Users\"")
 public class UserPO {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "\"ID\"")
+  @Column(name = "\"Id\"")
   private long id;
-  @Column(name = "Username", nullable = false)
+  @Column(name = "\"Username\"", nullable = false)
   private String username;
-  @Column(name = "UserDisplayName", nullable = false)
+  @Column(name = "\"UserDisplayName\"", nullable = false)
   private String userDisplayName;
-  @Column(name = "Password", nullable = false)
+  @Column(name = "\"Password\"", nullable = false)
   private String password;
-  @Column(name = "Email", nullable = false)
+  @Column(name = "\"Email\"", nullable = false)
   private String email;
-  @Column(name = "Enabled", nullable = false)
+  @Column(name = "\"Enabled\"", nullable = false)
   private int enabled;
+
+  @Transient
+  private List<String> orgIds;
 
   public long getId() {
     return id;
@@ -93,6 +98,14 @@ public class UserPO {
 
   public void setEnabled(int enabled) {
     this.enabled = enabled;
+  }
+
+  public List<String> getOrgIds() {
+    return orgIds;
+  }
+
+  public void setOrgIds(List<String> orgIds) {
+    this.orgIds = orgIds;
   }
 
   public UserInfo toUserInfo() {

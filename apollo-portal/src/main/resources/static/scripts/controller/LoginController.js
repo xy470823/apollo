@@ -15,10 +15,10 @@
  *
  */
 login_module.controller('LoginController',
-    ['$scope', '$window', '$location', '$translate', 'toastr', 'AppUtil',
+    ['$scope', '$window', '$location', '$translate', 'toastr', 'AppUtil', 'OrganizationService',
         LoginController]);
 
-function LoginController($scope, $window, $location, $translate, toastr, AppUtil) {
+function LoginController($scope, $window, $location, $translate, toastr, AppUtil, OrganizationService) {
     if ($location.$$url) {
         var params = AppUtil.parseParams($location.$$url);
         if (params.error) {
@@ -32,5 +32,23 @@ function LoginController($scope, $window, $location, $translate, toastr, AppUtil
             });
         }
     }
+
+    $scope.organizations = [];
+    $scope.selectedOrgId = '';
+    OrganizationService.find_organizations().then(function (result) {
+        $scope.organizations = result;
+    });
+
+    // 登录时必须选择部门，未选择则阻止提交并提示
+    $window.validateLoginOrg = function () {
+        var orgId = $scope.selectedOrgId;
+        if (!orgId) {
+            $translate('Login.SelectDepartment').then(function (result) {
+                $scope.info = result;
+            });
+            return false;
+        }
+        return true;
+    };
 
 }
