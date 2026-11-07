@@ -75,8 +75,16 @@
                         <span class="glyphicon glyphicon-user"></span>&nbsp;{{userDisplayName}}({{userName}})
                         <span class="caret"></span></a>
                     <ul class="dropdown-menu">
+                        <li><a href="javascript:void(0)"
+                               ng-click="openChangePasswordModal()">{{'Common.Nav.ChangePassword' | translate }}</a></li>
                         <li><a href="{{ '/user/logout' | prefixPath }}">{{'Common.Nav.Logout' | translate }}</a></li>
                     </ul>
+                </li>
+
+                <li ng-if="currentOrgName">
+                    <a href="javascript:void(0)" style="cursor: default;">
+                        <span class="glyphicon glyphicon-th-list"></span>&nbsp;{{'Common.Department' | translate }}: {{currentOrgName}}
+                    </a>
                 </li>
 
             </ul>
@@ -87,5 +95,8 @@
                 </div>
             </div>
         </div>
+
+        <!-- 修改密码弹窗：挂在 nav 内部，保证模板只有一个根节点（指令使用 replace: true） -->
+        <div ng-include="changePasswordModalUrl"></div>
     </div>
 </nav>

@@ -17,7 +17,7 @@
 /** navbar */
 directive_module.directive('apollonav',
     function ($compile, $window, $translate, toastr, AppUtil, AppService, EnvService,
-        UserService, CommonService, PermissionService) {
+        UserService, CommonService, PermissionService, OrganizationService) {
         return {
             restrict: 'E',
             templateUrl: AppUtil.prefixPath() + '/views/common/nav.html',
@@ -127,9 +127,68 @@ directive_module.directive('apollonav',
 
                 });
 
+                // 加载当前登录部门，用于在搜索框右侧展示
+                scope.currentOrgName = '';
+                UserService.getCurrentOrg().then(function (res) {
+                    var orgId = res.orgId;
+                    if (!orgId) {
+                        return;
+                    }
+                    OrganizationService.find_organizations().then(function (orgs) {
+                        orgs.forEach(function (org) {
+                            if (org.orgId === orgId) {
+                                scope.currentOrgName = org.orgName;
+                            }
+                        });
+                    });
+                }, function (result) {
+                    // 忽略获取失败
+                });
+
                 PermissionService.has_root_permission().then(function (result) {
                     scope.hasRootPermission = result.hasPermission;
                 })
+
+                scope.changePasswordModalUrl = AppUtil.prefixPath() + '/views/component/change-password-modal.html';
+
+                scope.openChangePasswordModal = function () {
+                    scope.changePassword = {
+                        oldPassword: '',
+                        newPassword: '',
+                        confirmPassword: '',
+                        errorMessage: '',
+                        submitting: false
+                    };
+                    $('#changePasswordDialog').modal('show');
+                };
+
+                scope.submitChangePassword = function () {
+                    var pwd = scope.changePassword;
+                    if (!pwd) {
+                        return;
+                    }
+                    if (!pwd.oldPassword || !pwd.newPassword || !pwd.confirmPassword) {
+                        pwd.errorMessage = $translate.instant('Common.ChangePassword.EmptyTips');
+                        return;
+                    }
+                    if (pwd.newPassword !== pwd.confirmPassword) {
+                        pwd.errorMessage = $translate.instant('Common.ChangePassword.NotMatch');
+                        return;
+                    }
+                    pwd.errorMessage = '';
+                    pwd.submitting = true;
+                    UserService.changePassword(pwd.oldPassword, pwd.newPassword).then(
+                        function () {
+                            pwd.submitting = false;
+                            $('#changePasswordDialog').modal('hide');
+                            toastr.success($translate.instant('Common.ChangePassword.Success'));
+                        },
+                        function (result) {
+                            pwd.submitting = false;
+                            pwd.errorMessage = AppUtil.errorMsg(result);
+                        }
+                    );
+                };
 
                 scope.changeLanguage = function (lang) {
                     $translate.use(lang)

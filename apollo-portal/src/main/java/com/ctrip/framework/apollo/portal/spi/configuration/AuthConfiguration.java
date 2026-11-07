@@ -19,7 +19,9 @@ package com.ctrip.framework.apollo.portal.spi.configuration;
 
 import com.ctrip.framework.apollo.common.condition.ConditionalOnMissingProfile;
 import com.ctrip.framework.apollo.core.utils.StringUtils;
+import com.ctrip.framework.apollo.portal.component.LoginOrgHolder;
 import com.ctrip.framework.apollo.portal.repository.AuthorityRepository;
+import com.ctrip.framework.apollo.portal.repository.UserOrgRepository;
 import com.ctrip.framework.apollo.portal.repository.UserRepository;
 import com.ctrip.framework.apollo.portal.spi.LogoutHandler;
 import com.ctrip.framework.apollo.portal.spi.SsoHeartbeatHandler;
@@ -38,6 +40,7 @@ import com.ctrip.framework.apollo.portal.spi.oidc.OidcLocalUserService;
 import com.ctrip.framework.apollo.portal.spi.oidc.OidcLocalUserServiceImpl;
 import com.ctrip.framework.apollo.portal.spi.oidc.OidcLogoutHandler;
 import com.ctrip.framework.apollo.portal.spi.oidc.OidcUserInfoHolder;
+import com.ctrip.framework.apollo.portal.spi.springsecurity.ApolloAuthenticationSuccessHandler;
 import com.ctrip.framework.apollo.portal.spi.springsecurity.ApolloPasswordEncoderFactory;
 import com.ctrip.framework.apollo.portal.spi.springsecurity.SpringSecurityUserInfoHolder;
 import com.ctrip.framework.apollo.portal.spi.springsecurity.SpringSecurityUserService;
@@ -83,7 +86,7 @@ public class AuthConfiguration {
 
   private static final String[] BY_PASS_URLS = {"/prometheus/**", "/metrics/**", "/openapi/**",
       "/vendor/**", "/styles/**", "/scripts/**", "/views/**", "/img/**", "/i18n/**", "/prefix-path",
-      "/health"};
+      "/organizations", "/health"};
 
   /**
    * spring.profiles.active = auth
@@ -154,8 +157,10 @@ public class AuthConfiguration {
     @DependsOn("jdbcUserDetailsManager")
     @ConditionalOnMissingBean(UserService.class)
     public UserService springSecurityUserService(PasswordEncoder passwordEncoder,
-        UserRepository userRepository, AuthorityRepository authorityRepository) {
-      return new SpringSecurityUserService(passwordEncoder, userRepository, authorityRepository);
+        UserRepository userRepository, AuthorityRepository authorityRepository,
+        UserOrgRepository userOrgRepository) {
+      return new SpringSecurityUserService(passwordEncoder, userRepository, authorityRepository,
+          userOrgRepository);
     }
 
   }
@@ -169,6 +174,12 @@ public class AuthConfiguration {
 
     public static final String USER_ROLE = "user";
 
+    private final LoginOrgHolder loginOrgHolder;
+
+    public SpringSecurityConfigurer(LoginOrgHolder loginOrgHolder) {
+      this.loginOrgHolder = loginOrgHolder;
+    }
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
       http.csrf().disable();
@@ -176,7 +187,9 @@ public class AuthConfiguration {
       http.authorizeRequests()
           .antMatchers(BY_PASS_URLS).permitAll()
           .antMatchers("/**").hasAnyRole(USER_ROLE);
-      http.formLogin().loginPage("/signin").defaultSuccessUrl("/", true).permitAll().failureUrl("/signin?#/error").and()
+      http.formLogin().loginPage("/signin").defaultSuccessUrl("/", true).permitAll().failureUrl("/signin?#/error")
+          .successHandler(new ApolloAuthenticationSuccessHandler(loginOrgHolder))
+          .and()
           .httpBasic();
       http.logout().logoutUrl("/user/logout").invalidateHttpSession(true).clearAuthentication(true)
           .logoutSuccessUrl("/signin?#/logout");

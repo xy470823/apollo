@@ -16,12 +16,15 @@
  */
 package com.ctrip.framework.apollo.portal.entity.bo;
 
+import java.util.List;
+
 public class UserInfo {
 
   private String userId;
   private String name;
   private String email;
   private int enabled;
+  private List<String> orgIds;
 
   public UserInfo() {
 
@@ -62,6 +65,15 @@ public class UserInfo {
   public void setEnabled(int enabled) {
     this.enabled = enabled;
   }
+
+  public List<String> getOrgIds() {
+    return orgIds;
+  }
+
+  public void setOrgIds(List<String> orgIds) {
+    this.orgIds = orgIds;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (o instanceof UserInfo) {

@@ -127,7 +127,6 @@
                         </div>
                         <div class="form-group" valdr-form-group>
                             <label class="col-sm-2 control-label">
-                                <apollorequiredfield></apollorequiredfield>
                                 {{'UserMange.Pwd' | translate }}
                             </label>
                             <div class="col-sm-5">
@@ -151,6 +150,15 @@
                                 <div class="col-sm-5">
                                     <input type="radio" name="enabled" ng-model="user.enabled" ng-value="1"/> {{'UserMange.Enable' | translate }}
                                     <input type="radio" name="enabled" ng-model="user.enabled" ng-value="0"/> {{'UserMange.Disable' | translate }}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">
+                                    <apollorequiredfield></apollorequiredfield>
+                                    {{'Common.Department' | translate }}
+                                </label>
+                                <div class="col-sm-5">
+                                    <select id="org-select" multiple="multiple" style="width: 100%"></select>
                                 </div>
                             </div>
                         <div class="form-group">

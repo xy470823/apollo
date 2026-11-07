@@ -124,6 +124,10 @@ public class AppService {
     return appRepository.findByOwnerName(ownerName, page);
   }
 
+  public List<App> findByOrgId(String orgId, Pageable page) {
+    return appRepository.findByOrgId(orgId, page);
+  }
+
   public App load(String appId) {
     return appRepository.findByAppId(appId);
   }

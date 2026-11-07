@@ -34,6 +34,8 @@ public interface AppRepository extends PagingAndSortingRepository<App, Long> {
 
   List<App> findByOwnerName(String ownerName, Pageable page);
 
+  List<App> findByOrgId(String orgId, Pageable pageable);
+
   List<App> findByAppIdIn(Set<String> appIds);
 
   List<App> findByAppIdIn(Set<String> appIds, Pageable pageable);

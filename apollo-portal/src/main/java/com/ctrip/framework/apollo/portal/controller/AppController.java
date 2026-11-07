@@ -26,6 +26,7 @@ import com.ctrip.framework.apollo.common.http.MultiResponseEntity;
 import com.ctrip.framework.apollo.common.http.RichResponseEntity;
 import com.ctrip.framework.apollo.common.utils.BeanUtils;
 import com.ctrip.framework.apollo.core.ConfigConsts;
+import com.ctrip.framework.apollo.portal.component.LoginOrgHolder;
 import com.ctrip.framework.apollo.portal.component.PortalSettings;
 import com.ctrip.framework.apollo.portal.enricher.adapter.AppDtoUserInfoEnrichedAdapter;
 import com.ctrip.framework.apollo.portal.entity.bo.UserInfo;
@@ -77,6 +78,7 @@ public class AppController {
   private final RolePermissionService rolePermissionService;
   private final RoleInitializationService roleInitializationService;
   private final AdditionalUserInfoEnrichService additionalUserInfoEnrichService;
+  private final LoginOrgHolder loginOrgHolder;
 
   public AppController(
       final UserInfoHolder userInfoHolder,
@@ -85,7 +87,8 @@ public class AppController {
       final ApplicationEventPublisher publisher,
       final RolePermissionService rolePermissionService,
       final RoleInitializationService roleInitializationService,
-      final AdditionalUserInfoEnrichService additionalUserInfoEnrichService) {
+      final AdditionalUserInfoEnrichService additionalUserInfoEnrichService,
+      final LoginOrgHolder loginOrgHolder) {
     this.userInfoHolder = userInfoHolder;
     this.appService = appService;
     this.portalSettings = portalSettings;
@@ -93,6 +96,7 @@ public class AppController {
     this.rolePermissionService = rolePermissionService;
     this.roleInitializationService = roleInitializationService;
     this.additionalUserInfoEnrichService = additionalUserInfoEnrichService;
+    this.loginOrgHolder = loginOrgHolder;
   }
 
   @GetMapping
@@ -107,7 +111,14 @@ public class AppController {
   public List<App> findAppsBySelf(Pageable page) {
     UserInfo loginUser = userInfoHolder.getUser();
     String userId = loginUser.getUserId();
-    
+
+    // 优先按登录所选择的部门展示该部门的全部应用（含他人创建）。
+    String loginOrgId = loginOrgHolder.getLoginOrgId();
+    if (!Strings.isNullOrEmpty(loginOrgId)) {
+      return appService.findByOrgId(loginOrgId, page);
+    }
+
+    // 未选择部门时回退到原有逻辑：按用户角色反推其可访问的应用。
     Set<String> appIds = Sets.newHashSet();
 
     List<Role> userRoles = rolePermissionService.findUserRoles(userId);

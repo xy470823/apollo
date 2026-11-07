@@ -77,6 +77,15 @@
         </div>
         <div class="main-table">
             <div class="create-app-list" ng-show="whichContent==='1'">
+                <div class="text-right create-btn-panel" ng-show="userOrgs.length > 1">
+                    <div class="org-switch-panel">
+                        <span class="org-switch-label">{{'Index.Department' | translate }}:</span>
+                        <select ng-model="currentOrgId" ng-change="switchOrg(currentOrgId)"
+                                class="org-switch-select">
+                            <option ng-repeat="org in orgList" value="{{org.orgId}}">{{org.orgName}}</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="text-right create-btn-panel">
                     <button class="btn btn-primary btn-md create-btn" ng-if="hasCreateApplicationPermission"
                             ng-click="goToCreateAppPage()">
@@ -258,6 +267,7 @@
     <script type="application/javascript" src="scripts/services/EnvService.js"></script>
     <script type="application/javascript" src="scripts/services/UserService.js"></script>
     <script type="application/javascript" src="scripts/services/CommonService.js"></script>
+    <script type="application/javascript" src="scripts/services/OrganizationService.js"></script>
     <script type="application/javascript" src="scripts/services/FavoriteService.js"></script>
     <script type="application/javascript" src="scripts/services/PermissionService.js"></script>
     <script type="application/javascript" src="scripts/services/NamespaceService.js"></script>

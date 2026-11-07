@@ -13,13 +13,6 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 --
--- ===============================================================================
--- 【重要】本文件是 MySQL 方言的母版脚本，仅供 apollo-build-sql-converter 生成
---   scripts/sql/profiles/{mysql-default,mysql-database-not-specified,h2-default}
---   使用，不能直接在 Oracle 上执行（反引号 / AUTO_INCREMENT / unsigned
---   会导致 ORA-00911: invalid character）。
---   Oracle 部署请执行：scripts/sql/oracle/apolloportaldb_oracle.sql
--- ===============================================================================
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
@@ -63,9 +56,9 @@ CREATE TABLE `App` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  UNIQUE KEY App_UK_AppId_DeletedAt` (`AppId`,`DeletedAt`),
-  KEY App_DataChange_LastTime` (`DataChange_LastTime`),
-  KEY App_IX_Name` (`NAME`)
+  UNIQUE KEY `App_UK_AppId_DeletedAt` (`AppId`,`DeletedAt`),
+  KEY `App_DataChange_LastTime` (`DataChange_LastTime`),
+  KEY `App_IX_Name` (`NAME`)
 )   COMMENT='应用表';
 
 
@@ -87,9 +80,9 @@ CREATE TABLE `AppNamespace` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  UNIQUE KEY AppNamespace_UK_AppId_Name_DeletedAt` (`AppId`,`NAME`,`DeletedAt`),
-  KEY AppNamespace_Name_AppId` (`NAME`,`AppId`),
-  KEY AppNamespace_DataChange_LastTime` (`DataChange_LastTime`)
+  UNIQUE KEY `AppNamespace_UK_AppId_Name_DeletedAt` (`AppId`,`NAME`,`DeletedAt`),
+  KEY `AppNamespace_Name_AppId` (`NAME`,`AppId`),
+  KEY `AppNamespace_DataChange_LastTime` (`DataChange_LastTime`)
 )   COMMENT='应用namespace定义';
 
 
@@ -112,8 +105,8 @@ CREATE TABLE `Consumer` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  UNIQUE KEY Consumer_UK_AppId_DeletedAt` (`AppId`,`DeletedAt`),
-  KEY Consumer_DataChange_LastTime` (`DataChange_LastTime`)
+  UNIQUE KEY `Consumer_UK_AppId_DeletedAt` (`AppId`,`DeletedAt`),
+  KEY `Consumer_DataChange_LastTime` (`DataChange_LastTime`)
 )   COMMENT='开放API消费者';
 
 
@@ -129,8 +122,8 @@ CREATE TABLE `ConsumerAudit` (
   `DataChange_CreatedTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  KEY ConsumerAudit_IX_DataChange_LastTime` (`DataChange_LastTime`),
-  KEY ConsumerAudit_IX_ConsumerId` (`ConsumerId`)
+  KEY `ConsumerAudit_IX_DataChange_LastTime` (`DataChange_LastTime`),
+  KEY `ConsumerAudit_IX_ConsumerId` (`ConsumerId`)
 )   COMMENT='consumer审计表';
 
 
@@ -149,9 +142,9 @@ CREATE TABLE `ConsumerRole` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  UNIQUE KEY ConsumerRole_UK_ConsumerId_RoleId_DeletedAt` (`ConsumerId`,`RoleId`,`DeletedAt`),
-  KEY ConsumerRole_IX_DataChange_LastTime` (`DataChange_LastTime`),
-  KEY ConsumerRole_IX_RoleId` (`RoleId`)
+  UNIQUE KEY `ConsumerRole_UK_ConsumerId_RoleId_DeletedAt` (`ConsumerId`,`RoleId`,`DeletedAt`),
+  KEY `ConsumerRole_IX_DataChange_LastTime` (`DataChange_LastTime`),
+  KEY `ConsumerRole_IX_RoleId` (`RoleId`)
 )   COMMENT='consumer和role的绑定表';
 
 
@@ -172,8 +165,8 @@ CREATE TABLE `ConsumerToken` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  UNIQUE KEY ConsumerToken_UK_Token_DeletedAt` (`Token`,`DeletedAt`),
-  KEY ConsumerToken_DataChange_LastTime` (`DataChange_LastTime`)
+  UNIQUE KEY `ConsumerToken_UK_Token_DeletedAt` (`Token`,`DeletedAt`),
+  KEY `ConsumerToken_DataChange_LastTime` (`DataChange_LastTime`)
 )   COMMENT='consumer token表';
 
 -- Dump of table favorite
@@ -191,9 +184,9 @@ CREATE TABLE `Favorite` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  UNIQUE KEY Favorite_UK_UserId_AppId_DeletedAt` (`UserId`,`AppId`,`DeletedAt`),
-  KEY Favorite_AppId` (`AppId`),
-  KEY Favorite_DataChange_LastTime` (`DataChange_LastTime`)
+  UNIQUE KEY `Favorite_UK_UserId_AppId_DeletedAt` (`UserId`,`AppId`,`DeletedAt`),
+  KEY `Favorite_AppId` (`AppId`),
+  KEY `Favorite_DataChange_LastTime` (`DataChange_LastTime`)
 )  AUTO_INCREMENT=23  COMMENT='应用收藏表';
 
 -- Dump of table permission
@@ -210,8 +203,8 @@ CREATE TABLE `Permission` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  UNIQUE KEY Permission_UK_TargetId_PermissionType_DeletedAt` (`TargetId`,`PermissionType`,`DeletedAt`),
-  KEY Permission_IX_DataChange_LastTime` (`DataChange_LastTime`)
+  UNIQUE KEY `Permission_UK_TargetId_PermissionType_DeletedAt` (`TargetId`,`PermissionType`,`DeletedAt`),
+  KEY `Permission_IX_DataChange_LastTime` (`DataChange_LastTime`)
 )   COMMENT='permission表';
 
 
@@ -229,8 +222,8 @@ CREATE TABLE `Role` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  UNIQUE KEY Role_UK_RoleName_DeletedAt` (`RoleName`,`DeletedAt`),
-  KEY Role_IX_DataChange_LastTime` (`DataChange_LastTime`)
+  UNIQUE KEY `Role_UK_RoleName_DeletedAt` (`RoleName`,`DeletedAt`),
+  KEY `Role_IX_DataChange_LastTime` (`DataChange_LastTime`)
 )   COMMENT='角色表';
 
 
@@ -249,9 +242,9 @@ CREATE TABLE `RolePermission` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  UNIQUE KEY RolePermission_UK_RoleId_PermissionId_DeletedAt` (`RoleId`,`PermissionId`,`DeletedAt`),
-  KEY RolePermission_IX_DataChange_LastTime` (`DataChange_LastTime`),
-  KEY RolePermission_IX_PermissionId` (`PermissionId`)
+  UNIQUE KEY `RolePermission_UK_RoleId_PermissionId_DeletedAt` (`RoleId`,`PermissionId`,`DeletedAt`),
+  KEY `RolePermission_IX_DataChange_LastTime` (`DataChange_LastTime`),
+  KEY `RolePermission_IX_PermissionId` (`PermissionId`)
 )   COMMENT='角色和权限的绑定表';
 
 
@@ -271,8 +264,8 @@ CREATE TABLE `ServerConfig` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  UNIQUE KEY ServerConfig_UK_Key_DeletedAt` (`Key`,`DeletedAt`),
-  KEY ServerConfig_DataChange_LastTime` (`DataChange_LastTime`)
+  UNIQUE KEY `ServerConfig_UK_Key_DeletedAt` (`Key`,`DeletedAt`),
+  KEY `ServerConfig_DataChange_LastTime` (`DataChange_LastTime`)
 )   COMMENT='配置服务自身配置';
 
 
@@ -291,9 +284,9 @@ CREATE TABLE `UserRole` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  UNIQUE KEY UserRole_UK_UserId_RoleId_DeletedAt` (`UserId`,`RoleId`,`DeletedAt`),
-  KEY UserRole_IX_DataChange_LastTime` (`DataChange_LastTime`),
-  KEY UserRole_IX_RoleId` (`RoleId`)
+  UNIQUE KEY `UserRole_UK_UserId_RoleId_DeletedAt` (`UserId`,`RoleId`,`DeletedAt`),
+  KEY `UserRole_IX_DataChange_LastTime` (`DataChange_LastTime`),
+  KEY `UserRole_IX_RoleId` (`RoleId`)
 )   COMMENT='用户和role的绑定表';
 
 -- Dump of table Users
@@ -307,7 +300,7 @@ CREATE TABLE `Users` (
   `Email` varchar(64) NOT NULL DEFAULT 'default' COMMENT '邮箱地址',
   `Enabled` tinyint(4) DEFAULT NULL COMMENT '是否有效',
   PRIMARY KEY (`ID`),
-  UNIQUE KEY Users_UK_Username` (`Username`)
+  UNIQUE KEY `Users_UK_Username` (`Username`)
 )   COMMENT='用户表';
 
 
@@ -334,9 +327,9 @@ CREATE TABLE `SPRING_SESSION` (
   `EXPIRY_TIME` bigint NOT NULL,
   `PRINCIPAL_NAME` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`PRIMARY_ID`),
-  UNIQUE KEY SPRING_SESSION_SPRING_SESSION_IX1` (`SESSION_ID`),
-  KEY SPRING_SESSION_SPRING_SESSION_IX2` (`EXPIRY_TIME`),
-  KEY SPRING_SESSION_SPRING_SESSION_IX3` (`PRINCIPAL_NAME`)
+  UNIQUE KEY `SPRING_SESSION_SPRING_SESSION_IX1` (`SESSION_ID`),
+  KEY `SPRING_SESSION_SPRING_SESSION_IX2` (`EXPIRY_TIME`),
+  KEY `SPRING_SESSION_SPRING_SESSION_IX3` (`PRINCIPAL_NAME`)
 )   ;
 
 -- Dump of table SPRING_SESSION_ATTRIBUTES
@@ -370,10 +363,10 @@ CREATE TABLE `AuditLog` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  KEY AuditLog_IX_TraceId` (`TraceId`),
-  KEY AuditLog_IX_OpName` (`OpName`),
-  KEY AuditLog_IX_DataChange_CreatedTime` (`DataChange_CreatedTime`),
-  KEY AuditLog_IX_Operator` (`Operator`)
+  KEY `AuditLog_IX_TraceId` (`TraceId`),
+  KEY `AuditLog_IX_OpName` (`OpName`),
+  KEY `AuditLog_IX_DataChange_CreatedTime` (`DataChange_CreatedTime`),
+  KEY `AuditLog_IX_Operator` (`Operator`)
 )   COMMENT='审计日志表';
 
 -- Dump of table AuditLogDataInfluence
@@ -394,9 +387,9 @@ CREATE TABLE `AuditLogDataInfluence` (
   `DataChange_LastModifiedBy` varchar(64) DEFAULT '' COMMENT '最后修改人邮箱前缀',
   `DataChange_LastTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`ID`),
-  KEY AuditLogDataInfluence_IX_SpanId` (`SpanId`),
-  KEY AuditLogDataInfluence_IX_DataChange_CreatedTime` (`DataChange_CreatedTime`),
-  KEY AuditLogDataInfluence_IX_EntityId` (`InfluenceEntityId`)
+  KEY `AuditLogDataInfluence_IX_SpanId` (`SpanId`),
+  KEY `AuditLogDataInfluence_IX_DataChange_CreatedTime` (`DataChange_CreatedTime`),
+  KEY `AuditLogDataInfluence_IX_EntityId` (`InfluenceEntityId`)
 )   COMMENT='审计日志数据变动表';
 
 -- Config

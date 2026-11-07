@@ -32,7 +32,7 @@ CREATE ALIAS IF NOT EXISTS UNIX_TIMESTAMP_MILLIS FOR "com.ctrip.framework.apollo
 
 -- 
 
-ALTER TABLE CLUSTER ADD COLUMN `COMMENT` varchar(64) DEFAULT NULL COMMENT '备注';
+ALTER TABLE `CLUSTER` ADD COLUMN `COMMENT` varchar(64) DEFAULT NULL COMMENT '备注';
 
 -- 
 -- ===============================================================================

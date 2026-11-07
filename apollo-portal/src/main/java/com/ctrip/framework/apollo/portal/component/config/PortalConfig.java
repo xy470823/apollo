@@ -294,6 +294,19 @@ public class PortalConfig extends RefreshableConfig {
     return getBooleanProperty(SystemRoleManagerService.CREATE_APPLICATION_LIMIT_SWITCH_KEY, false);
   }
 
+  /**
+   * 不允许创建应用的用户名单，默认只有内置的 apollo 账号。
+   * 可在 PortalDB.ServerConfig 中通过 role.create-application.denied-users 覆盖，置空即不限制。
+   */
+  public List<String> createApplicationDeniedUsers() {
+    String deniedUsers = getValue(
+        SystemRoleManagerService.CREATE_APPLICATION_DENIED_USERS_KEY, "apollo");
+    if (Strings.isNullOrEmpty(deniedUsers)) {
+      return Collections.emptyList();
+    }
+    return splitter.splitToList(deniedUsers);
+  }
+
   public boolean isManageAppMasterPermissionEnabled() {
     return getBooleanProperty(SystemRoleManagerService.MANAGE_APP_MASTER_LIMIT_SWITCH_KEY, false);
   }

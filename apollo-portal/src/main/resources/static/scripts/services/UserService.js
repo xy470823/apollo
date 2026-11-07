@@ -29,6 +29,18 @@ appService.service('UserService', ['$resource', '$q', 'AppUtil', function ($reso
             method: 'PUT',
             url: AppUtil.prefixPath() + '/users/enabled'
         },
+        change_password: {
+            method: 'PUT',
+            url: AppUtil.prefixPath() + '/users/password'
+        },
+        get_current_org: {
+            method: 'GET',
+            url: AppUtil.prefixPath() + '/user/current-org'
+        },
+        switch_current_org: {
+            method: 'PUT',
+            url: AppUtil.prefixPath() + '/user/current-org'
+        },
         create_or_update_user: {
             method: 'POST',
             url: AppUtil.prefixPath() + '/users?isCreate=:isCreate'
@@ -85,6 +97,42 @@ appService.service('UserService', ['$resource', '$q', 'AppUtil', function ($reso
                                      function (result) {
                                          d.reject(result);
                                      });
+            return d.promise;
+        },
+        changePassword: function (oldPassword, newPassword) {
+            var d = $q.defer();
+            user_resource.change_password({}, {
+                                             oldPassword: oldPassword,
+                                             newPassword: newPassword
+                                         },
+                                         function (result) {
+                                             d.resolve(result);
+                                         },
+                                         function (result) {
+                                             d.reject(result);
+                                         });
+            return d.promise;
+        },
+        getCurrentOrg: function () {
+            var d = $q.defer();
+            user_resource.get_current_org({},
+                                         function (result) {
+                                             d.resolve(result);
+                                         },
+                                         function (result) {
+                                             d.reject(result);
+                                         });
+            return d.promise;
+        },
+        switchCurrentOrg: function (orgId) {
+            var d = $q.defer();
+            user_resource.switch_current_org({}, { orgId: orgId },
+                                         function (result) {
+                                             d.resolve(result);
+                                         },
+                                         function (result) {
+                                             d.reject(result);
+                                         });
             return d.promise;
         }
     }

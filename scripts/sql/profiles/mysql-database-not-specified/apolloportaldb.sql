@@ -13,13 +13,6 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 --
--- ===============================================================================
--- 【重要】本文件是 MySQL 方言的母版脚本，仅供 apollo-build-sql-converter 生成
---   scripts/sql/profiles/{mysql-default,mysql-database-not-specified,h2-default}
---   使用，不能直接在 Oracle 上执行（反引号 / AUTO_INCREMENT / unsigned
---   会导致 ORA-00911: invalid character）。
---   Oracle 部署请执行：scripts/sql/oracle/apolloportaldb_oracle.sql
--- ===============================================================================
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;

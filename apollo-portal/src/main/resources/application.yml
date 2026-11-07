@@ -16,6 +16,15 @@
 spring:
   profiles:
     active: github
+  web:
+    resources:
+      cache:
+        cachecontrol:
+          # 禁用静态资源(js/css等)缓存，避免前端改动后浏览器仍使用旧版本
+          no-cache: true
+          no-store: true
+          max-age: 0
+          must-revalidate: true
   jpa:
     properties:
       hibernate:

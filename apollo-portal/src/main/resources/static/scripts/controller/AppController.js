@@ -47,6 +47,15 @@ function createAppController($scope, $window, $translate, toastr, AppService, Ap
                 width: '100%',
                 data: organizations
             });
+
+            // 部门直接取登录时选择的部门，并置灰不可更改
+            UserService.getCurrentOrg().then(function (res) {
+                var currentOrgId = res.orgId;
+                if (currentOrgId && organizations.some(function (o) { return o.id === currentOrgId; })) {
+                    $('#organization').val(currentOrgId).trigger('change');
+                }
+                $('#organization').prop('disabled', true);
+            });
         }, function (result) {
             toastr.error(AppUtil.errorMsg(result), "load organizations error");
         });

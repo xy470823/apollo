@@ -15,16 +15,17 @@
  *
  */
 user_module.controller('UserController',
-    ['$scope', '$window', '$translate', 'toastr', 'AppUtil', 'UserService', 'PermissionService',
+    ['$scope', '$window', '$translate', 'toastr', 'AppUtil', 'UserService', 'PermissionService', 'OrganizationService',
         UserController]);
 
-function UserController($scope, $window, $translate, toastr, AppUtil, UserService, PermissionService) {
+function UserController($scope, $window, $translate, toastr, AppUtil, UserService, PermissionService, OrganizationService) {
 
     $scope.user = {};
     $scope.createdUsers = [];
     $scope.filterUser = [];
     $scope.status = '1'
     $scope.searchKey = ''
+    $scope.organizations = [];
     $scope.changeStatus = changeStatus
     $scope.searchUsers = searchUsers
     $scope.resetSearchUser = resetSearchUser
@@ -33,11 +34,35 @@ function UserController($scope, $window, $translate, toastr, AppUtil, UserServic
 
     getCreatedUsers();
 
+    initOrganizations();
+
     function initPermission() {
         PermissionService.has_root_permission()
         .then(function (result) {
             $scope.isRootUser = result.hasPermission;
         })
+    }
+
+    function initOrganizations() {
+        OrganizationService.find_organizations().then(function (result) {
+            var organizations = [];
+            result.forEach(function (item) {
+                var org = {};
+                org.id = item.orgId;
+                org.text = item.orgName;
+                organizations.push(org);
+            });
+            $scope.organizations = result;
+            $('#org-select').select2({
+                placeholder: $translate.instant('Common.PleaseChooseDepartment'),
+                width: '100%',
+                data: organizations
+            });
+            // 编辑时回显部门
+            $('#org-select').on('change', function () {
+                $scope.user.orgIds = $('#org-select').val();
+            });
+        });
     }
 
     function getCreatedUsers() {
@@ -57,14 +82,28 @@ function UserController($scope, $window, $translate, toastr, AppUtil, UserServic
 
     function changeStatus(status, user){
         $scope.status = status
-        $scope.user = {}
+        $scope.user = { orgIds: [] }
         if (user != null) {
             $scope.user = {
                 username: user.userId,
                 userDisplayName: user.name,
                 email: user.email,
                 enabled: user.enabled,
+                orgIds: user.orgIds || []
             }
+            // 回显部门多选
+            setTimeout(function () {
+                if ($('#org-select').length) {
+                    $('#org-select').val($scope.user.orgIds).trigger('change');
+                }
+            }, 100);
+        } else {
+            // 新增用户时清空部门多选
+            setTimeout(function () {
+                if ($('#org-select').length) {
+                    $('#org-select').val([]).trigger('change');
+                }
+            }, 100);
         }
     }
 
@@ -104,6 +143,12 @@ function UserController($scope, $window, $translate, toastr, AppUtil, UserServic
     }
 
     $scope.createOrUpdateUser = function () {
+        // 除 apollo 外，其他用户必须选择部门
+        if ($scope.user.username !== 'apollo'
+            && (!$scope.user.orgIds || $scope.user.orgIds.length === 0)) {
+            toastr.error($translate.instant('UserMange.DepartmentRequired'));
+            return;
+        }
         if ($scope.status === '2') {
             UserService.createOrUpdateUser(true, $scope.user).then(function (result) {
                 toastr.success($translate.instant('UserMange.Created'));

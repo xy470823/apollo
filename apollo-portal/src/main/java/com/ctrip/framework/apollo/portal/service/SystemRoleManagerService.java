@@ -35,6 +35,12 @@ public class SystemRoleManagerService {
   public static final String CREATE_APPLICATION_LIMIT_SWITCH_KEY = "role.create-application.enabled";
   public static final String MANAGE_APP_MASTER_LIMIT_SWITCH_KEY = "role.manage-app-master.enabled";
 
+  /**
+   * 禁止创建应用的用户名单（逗号分隔）。名单内的用户即使是超级管理员也不能创建应用。
+   * 置空即关闭该限制。
+   */
+  public static final String CREATE_APPLICATION_DENIED_USERS_KEY = "role.create-application.denied-users";
+
   private final RolePermissionService rolePermissionService;
 
   private final PortalConfig portalConfig;
@@ -63,11 +69,24 @@ public class SystemRoleManagerService {
   }
 
   public boolean hasCreateApplicationPermission(String userId) {
+    if (isCreateApplicationDenied(userId)) {
+      logger.warn("user [{}] is in the create-application denied list [{}], refuse to create app",
+          userId, portalConfig.createApplicationDeniedUsers());
+      return false;
+    }
+
     if (!isCreateApplicationPermissionEnabled()) {
       return true;
     }
 
     return rolePermissionService.userHasPermission(userId, PermissionType.CREATE_APPLICATION, SYSTEM_PERMISSION_TARGET_ID);
+  }
+
+  private boolean isCreateApplicationDenied(String userId) {
+    if (userId == null) {
+      return false;
+    }
+    return portalConfig.createApplicationDeniedUsers().contains(userId);
   }
 
   public boolean hasManageAppMasterPermission(String userId, String appId) {
